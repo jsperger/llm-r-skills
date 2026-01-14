@@ -7,6 +7,7 @@ description: >
   injection with !!/!!!/{{, symbol construction with sym()/syms(). Does NOT
   cover: data-mask programming patterns (tidy-evaluation), error handling
   (rlang-conditions), function design (designing-tidy-r-functions).
+dependencies: R>=4.3, rlang>=1.1.3
 ---
 
 # R Metaprogramming with rlang

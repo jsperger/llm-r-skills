@@ -5,6 +5,7 @@ description: >
   for formula, data frame, matrix, and recipe interfaces. Covers: mold() for
   training data preprocessing, forge() for prediction data validation,
   blueprints, model constructors, spruce functions for output formatting.
+dependencies: R>=4.3, hardhat>=1.4.2
 ---
 
 # Creating Modeling Packages with hardhat

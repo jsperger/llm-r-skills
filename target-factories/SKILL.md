@@ -2,7 +2,7 @@
 name: target factories
 description: >
   Write R functions extending the targets workflow framework (target factories), or implement static/dynamic branching patterns for targets. 
- dependencies: R>=4.3, targets>=1.6.0
+dependencies: R>=4.3, targets>=1.6.0
 ---
 
 ## Overview
@@ -10,7 +10,17 @@ description: >
 This skill explains how to extend
 [`targets`](https://docs.ropensci.org/targets), a Make-like pipeline tool for R,
 by writing target factories. Target factories are functions that generate lists of
-pre-configured targets from simple user inputs. 
+pre-configured target definition objects from simple user inputs. Use [targetopia-packages.md](targetopia packages) for package development workflows.
+
+Use cases
+- writing branching targets
+  + static branching with map / combine
+  + dynamic branching via `pattern` argument to `tar_target`
+  + recombining dynamic branches
+  + dynamic within static branching
+- writing target factory functions
+- writing packages that extend targets
+- map / combine
 
 ## Quick Reference
 
@@ -22,17 +32,51 @@ pre-configured targets from simple user inputs.
 | Insert values into expression | `substitute(f(arg), env = list(arg = value))` |
 | String to symbol | `as.symbol("name")` |
 | Static branching | `tarchetypes::tar_map()` |
-| Dynamic branching | `pattern` argument + batching |
-| Test in temp directory | `targets::tar_test()` |
-| Check pipeline structure | `tar_manifest()`, `tar_network()` |
+| Dynamic branching | `targets::tar_target(..., pattern = map(...))` |
+
+### tar_target_raw() vs tar_target()
+
+| Aspect | `tar_target()` | `tar_target_raw()` |
+|--------|----------------|-------------------|
+| Audience | End users | Package developers |
+| Name argument | Symbol | Character string |
+| Command argument | Expression | Quoted expression |
+| Pattern argument | Expression | Quoted expression |
+
+## Choosing between static and dynamic branching
+Static branching defines the iteration space at configuration time (parsing targets source script); dynamic branching defines configuration at run time. Dynamic branching can be used within static branching. 
+
+```
+Iteration space known before `tar_make()`?
+├── No: Dynamic 
+└── Yes: Heterogeneous tasks?
+    ├── Yes: Static 
+    └── No: Large scale?
+        ├── Yes: Dynamic 
+        └── No: Named nodes in DAG needed?
+            ├── Yes: Static 
+            └── No: Dynamic 
+```
+
+### Static Branching (tar_map)
+
+* Mechanism: Metaprogramming; expands `_targets.R` during parsing.
+* Use Case: Small, distinct sets (e.g., comparing specific model architectures).
+* Pro: Every branch is a unique node in tar_visnetwork().
+
+### Dynamic Branching (`pattern` arg to `targets::tar_target`)
+
+* Mechanism: Runtime dispatch; branches created after upstream completion.
+* Use Case: High-throughput (simulations), data-driven partitioning.
+* Pro: Concise script & DAG; handles (N) branches where (N) is unknown at configuration.
 
 ## Target Factory Pattern
 
-A target factory accepts simple inputs and returns a list of configured targets:
+A target factory is a function that accepts simple inputs, calls [`tar_target_raw()`](https://docs.ropensci.org/targets/reference/tar_target_raw.html), and produces a list of configured target definition objects:
 
 ```r
 #' @export
-target_factory <- function(name, file) {
+fit_model_to_data <- function(name, file) {
   # Build target names from user input
  name_model <- deparse(substitute(name))
   name_file <- paste0(name_model, "_file")
@@ -47,9 +91,9 @@ target_factory <- function(name, file) {
   command_model <- substitute(run_model(data), env = list(data = sym_data))
 
  list(
-    tar_target_raw(name_file, file, format = "file", deployment = "main"),
-    tar_target_raw(name_data, command_data, format = "fst_tbl"),
-    tar_target_raw(name_model, command_model, format = "qs")
+    targets::tar_target_raw(name_file, file, format = "file", deployment = "main"),
+    targets::tar_target_raw(name_data, command_data, format = "fst_tbl"),
+    targets::tar_target_raw(name_model, command_model, format = "qs")
   )
 }
 ```
@@ -60,17 +104,8 @@ User writes one call instead of multiple `tar_target()` calls:
 # _targets.R
 library(targets)
 library(yourPackage)
-target_factory(custom, "data.csv")
+fit_model_to_data(custom_model, "data.csv")
 ```
-
-## tar_target_raw() vs tar_target()
-
-| Aspect | `tar_target()` | `tar_target_raw()` |
-|--------|----------------|-------------------|
-| Audience | End users | Package developers |
-| Name argument | Symbol | Character string |
-| Command argument | Expression | Quoted expression |
-| Pattern argument | Expression | Quoted expression |
 
 ## Metaprogramming Essentials
 
@@ -110,89 +145,9 @@ as.symbol("my_target")
 #> my_target
 ```
 
-## Optimal Settings
+## Target factories should pre-configure settings using domain knowledge
 
-Pre-configure arguments users shouldn't worry about:
-
-| Setting | When to Use |
-|---------|-------------|
-| `deployment = "main"` | File targets (local files can't run on remote workers) |
-| `format = "file"` | Track input files, invalidate when contents change |
-| `format = "fst_tbl"` | Efficient data frame storage |
-| `format = "qs"` | Efficient general-purpose storage |
-
-Expose arguments users may need (`priority`, `cue`). Hide low-level arguments (`deps`, `string`).
-
-## Branching
-
-### Static Branching
-
-For small numbers of heterogeneous tasks. Use `tarchetypes::tar_map()`:
-
-```r
-# Internally map over Stan model files
-tar_stan_mcmc <- function(stan_files, ...) {
-  tarchetypes::tar_map(
-    values = list(stan_file = stan_files),
-    tar_target_raw(...)
-  )
-}
-```
-
-### Dynamic Branching
-
-For large homogeneous tasks. Generate `pattern` argument programmatically and support batching:
-
-```r
-my_factory <- function(name, batches = 1, reps = 1, ...) {
-  # Users control batches/reps, NOT pattern
-  # See tar_rep_raw(), tar_stan_mcmc_rep_summary() for examples
-}
-```
-
-## Testing
-
-### What to Test
-
-1. **Results**: Run pipeline, check outputs
-2. **Manifest**: Verify target count, commands, settings
-3. **Dependencies**: Check graph edges between targets
-
-### tar_test() Pattern
-
-```r
-tar_test("factory creates correct targets", {
-  # Runs in temp directory, resets options after
-  targets <- target_factory(test, "data.csv")
-  expect_length(targets, 3)
-  expect_equal(targets[[1]]$settings$name, "test_file")
-})
-```
-
-### Speed Tips
-
-- Use `callr_function = NULL` in `tar_make()` for faster tests (but sensitive to test environment)
-- Use `testthat::skip_on_cran()` for slow tests
-
-## Documentation
-
-### Examples
-
-Keep `@examples` fast and avoid non-temporary files. Use `tar_dir()` for runnable examples:
-
-```r
-#' @examples
-#' targets::tar_dir({
-#'   targets::tar_script(target_factory(example, "data.csv"))
-#'   targets::tar_make()
-#' })
-```
-
-### README Badge
-
-```md
-[![R Targetopia](https://img.shields.io/badge/R_Targetopia-member-blue?style=flat&labelColor=gray)](https://wlandau.github.io/targetopia/)
-```
+Pre-configure arguments users shouldn't worry about.
 
 ## See Also
 
@@ -200,13 +155,9 @@ Keep `@examples` fast and avoid non-temporary files. Use `tar_dir()` for runnabl
 - **designing-tidy-r-functions**: Function API design
 - **testing-r-packages**: Testing patterns
 
-## Reference Files
-
-- [targetopia.Rmd](targetopia.Rmd) - Complete guide with full examples
-
 ## External Resources
 
 - [targets documentation](https://docs.ropensci.org/targets)
-- [tarchetypes package](https://docs.ropensci.org/tarchetypes)
-- [stantargets](https://docs.ropensci.org/stantargets) - Example Targetopia package
+- [tarchetypes package](https://docs.ropensci.org/tarchetypes) - Targetopia package containing a collection of target and pipeline archetypes
+- [stantargets](https://docs.ropensci.org/stantargets) - Example domain-specific Targetopia package
 - [rOpenSci software review](https://devguide.ropensci.org/softwarereviewintro.html)

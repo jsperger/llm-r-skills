@@ -7,6 +7,7 @@ description: >
   bridge patterns with across()/all_of(), double evaluation and ambiguity
   pitfalls. Does NOT cover: expression mechanics (r-metaprogramming), error
   handling (rlang-conditions), function design (designing-tidy-r-functions).
+dependencies: R>=4.3, rlang>=1.1.3
 ---
 
 # Tidy Evaluation Programming Patterns

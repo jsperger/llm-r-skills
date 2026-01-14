@@ -7,6 +7,7 @@ description: >
   caller_arg(), (3) Input validation helpers that report the right function,
   (4) Error chaining with try_fetch() and parent argument,
   (5) Testing error conditions with testthat snapshots.
+dependencies: R>=4.3, rlang>=1.1.3
 ---
 
 # Condition Handling in R Packages
