@@ -376,11 +376,17 @@ data |> dplyr::mutate(y = data + 1)
 - **designing-tidy-r-functions**: Function API design principles
 - **rlang-conditions**: Error handling with rlang
 
-## Reference Files
+## Vignettes
 
-- [topic-data-mask.Rmd](topic-data-mask.Rmd) - Data masking concepts and history
-- [topic-data-mask-programming.Rmd](topic-data-mask-programming.Rmd) - Complete programming guide
-- [topic-data-mask-ambiguity.Rmd](topic-data-mask-ambiguity.Rmd) - Collision details
-- [topic-double-evaluation.Rmd](topic-double-evaluation.Rmd) - Double evaluation problem
-- [topic-inject-out-of-context.Rmd](topic-inject-out-of-context.Rmd) - Operator misuse
-- [topic-embrace-non-args.Rmd](topic-embrace-non-args.Rmd) - Embrace on non-arguments
+Access detailed rlang documentation via R:
+
+```r
+# Data masking concepts
+vignette("data-mask", package = "rlang")
+
+# Programming with data masking
+vignette("data-mask-programming", package = "rlang")
+
+# Or browse all vignettes
+browseVignettes("rlang")
+```
