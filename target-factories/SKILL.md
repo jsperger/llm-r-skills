@@ -1,15 +1,16 @@
 ---
-name: creating-targetopia-packages
+name: target factories
 description: >
-  Use when creating an R package that extends the targets workflow framework,
-  building target factories for domain-specific pipelines, or implementing
-  static/dynamic branching patterns for targets. Covers: tar_target_raw(),
-  metaprogramming for factories, batching, testing pipelines.
+  Write R functions extending the targets workflow framework (target factories), or implement static/dynamic branching patterns for targets. 
+ dependencies: R>=4.3, targets>=1.6.0
 ---
 
-# Creating R Targetopia Packages
+## Overview
 
-R Targetopia packages extend the [`targets`](https://docs.ropensci.org/targets) workflow framework for specific domains. They use **target factories** - functions that generate lists of pre-configured targets from simple user inputs.
+This skill explains how to extend
+[`targets`](https://docs.ropensci.org/targets), a Make-like pipeline tool for R,
+by writing target factories. Target factories are functions that generate lists of
+pre-configured targets from simple user inputs. 
 
 ## Quick Reference
 
