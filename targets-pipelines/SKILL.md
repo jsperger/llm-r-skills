@@ -271,6 +271,10 @@ targets::tar_branches(target_name)
 - [topic-target-factories.md](topic-target-factories.md) - Custom factory functions
 - [references/tarchetypes-functions.md](references/tarchetypes-functions.md) - Function reference
 - [references/pattern-composition.md](references/pattern-composition.md) - Pattern algebra
+- [references/targets-utilities.md](references/targets-utilities.md) - Package author utilities
+- [templates/static-branching.R](templates/static-branching.R) - Static branching code template
+- [templates/target-factory.R](templates/target-factory.R) - Target factory code template
+- [targetopia-packages.md](targetopia-packages.md) - Targetopia package development guide
 
 ## External Resources
 

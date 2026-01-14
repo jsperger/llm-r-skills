@@ -51,4 +51,4 @@ targets::tar_test("factory creates correct targets", {
 
 ## See Also
 
-[utilities for package authors](references/targets_utilities.md)
+[utilities for package authors](references/targets-utilities.md)
