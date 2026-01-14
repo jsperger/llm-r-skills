@@ -23,10 +23,10 @@ Techniques for manipulating R expressions and building code programmatically usi
 
 Best practices for handling errors and messages using `rlang` and `cli`. Includes patterns for formatted output, error chaining, and informative input checkers.
 
-### [target-factories](target-factories)
-**Status**: Do not use
+### [targets-pipelines](targets-pipelines)
+**Status**: Alpha
 
-Methods for extending the `targets` workflow framework by creating custom target factories. Explains implementing static and dynamic branching patterns.
+Complex `targets` pipeline patterns including static branching (`tar_map`/`tar_combine`), dynamic branching (`pattern` argument), hybrid patterns (`tar_map_rep`), and custom target factories. Includes decision tree, debugging guide, and templates.
 
 ### [tidy-evaluation](tidy-evaluation)
 **Status**: Alpha
