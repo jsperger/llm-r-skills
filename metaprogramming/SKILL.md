@@ -358,7 +358,7 @@ Outside tidy eval/inject contexts, operators have different meanings:
 | `!!` | Inject | Double negation (logical) |
 | `!!!` | Splice | Triple negation (logical) |
 
-These fail silently. See [topic-inject-out-of-context.Rmd](topic-inject-out-of-context.Rmd).
+These fail silently. See the [tidy-evaluation](../tidy-evaluation/SKILL.md) skill for details on proper usage contexts.
 
 ## See Also
 
@@ -368,10 +368,21 @@ These fail silently. See [topic-inject-out-of-context.Rmd](topic-inject-out-of-c
 
 ## Reference Files
 
-- [topic-defuse.Rmd](topic-defuse.Rmd) - Detailed defusing documentation
-- [topic-quosure.Rmd](topic-quosure.Rmd) - Complete quosure reference
-- [topic-inject.Rmd](topic-inject.Rmd) - Injection operator details
-- [topic-metaprogramming.Rmd](topic-metaprogramming.Rmd) - Advanced transformation patterns
-- [glue-operators.Rmd](glue-operators.Rmd) - Name interpolation reference
-- [topic-multiple-columns.Rmd](topic-multiple-columns.Rmd) - Multiple columns patterns
-- [topic-embrace-constants.Rmd](topic-embrace-constants.Rmd) - Constants behavior
+- [topic-quosure.md](topic-quosure.md) - Complete quosure reference
+- [topic-metaprogramming.md](topic-metaprogramming.md) - Advanced transformation patterns
+- [topic-multiple-columns.md](topic-multiple-columns.md) - Multiple columns patterns
+
+## Vignettes
+
+Access detailed rlang documentation via R:
+
+```r
+# Defusing expressions
+vignette("topic-defuse", package = "rlang")
+
+# Injection operators
+vignette("topic-inject", package = "rlang")
+
+# Or browse all vignettes
+browseVignettes("rlang")
+```

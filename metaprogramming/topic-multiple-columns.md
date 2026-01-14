@@ -1,11 +1,10 @@
-```{r, child = "setup.Rmd", include = FALSE}
-```
+# Multiple Columns Patterns
 
 In this guide we compare ways of taking multiple columns in a single function argument.
 
-As a refresher (see the [programming patterns][topic-data-mask-programming] article), there are two common ways of passing arguments to [data-masking][topic-data-mask] functions. For single arguments, embrace with `r link("{{")`:
+As a refresher (see the programming patterns article), there are two common ways of passing arguments to data-masking functions. For single arguments, embrace with `{{`:
 
-```{r, comment = "#>", collapse = TRUE}
+```r
 my_group_by <- function(data, var) {
   data |> dplyr::group_by({{ var }})
 }
@@ -17,7 +16,7 @@ my_pivot_longer <- function(data, var) {
 
 For multiple arguments in `...`, pass them on to functions that also take `...` like `group_by()`, or pass them within `c()` for functions taking tidy selection in a single argument like `pivot_longer()`:
 
-```{r, comment = "#>", collapse = TRUE}
+```r
 # Pass dots through
 my_group_by <- function(.data, ...) {
   .data |> dplyr::group_by(...)
@@ -31,9 +30,9 @@ my_pivot_longer <- function(.data, ...) {
 But what if you want to take multiple columns in a single named argument rather than in `...`?
 
 
-# Using tidy selections
+## Using tidy selections
 
-The idiomatic tidyverse way of taking multiple columns in a single argument is to take a _tidy selection_ (see the [Argument behaviours][topic-data-mask-programming] section). In tidy selections, the syntax for passing multiple columns in a single argument is `c()`:
+The idiomatic tidyverse way of taking multiple columns in a single argument is to take a _tidy selection_ (see the Argument behaviours section). In tidy selections, the syntax for passing multiple columns in a single argument is `c()`:
 
 ```r
 mtcars |> tidyr::pivot_longer(c(am, cyl, vs))
@@ -49,7 +48,7 @@ my_pivot_longer <- function(data, var) {
 mtcars |> my_pivot_longer(c(am, cyl, vs))
 ```
 
-For `group_by()`, which takes data-masked arguments, we'll use `across()` as a _bridge_ (see [Bridge patterns][topic-data-mask-programming]).
+For `group_by()`, which takes data-masked arguments, we'll use `across()` as a _bridge_ (see Bridge patterns).
 
 ```r
 my_group_by <- function(data, var) {
@@ -62,9 +61,9 @@ mtcars |> my_group_by(c(am, cyl, vs))
 When embracing in tidyselect context or using `across()` is not possible, you might have to implement tidyselect behaviour manually with `tidyselect::eval_select()`.
 
 
-# Using external defusal
+## Using external defusal
 
-To implement an argument with tidyselect behaviour, it is necessary to [defuse][topic-defuse] the argument. However defusing an argument which had historically behaved like a regular argument is a rather disruptive breaking change. This is why we could not implement tidy selections in ggplot2 facetting functions like `facet_grid()` and `facet_wrap()`.
+To implement an argument with tidyselect behaviour, it is necessary to defuse the argument. However defusing an argument which had historically behaved like a regular argument is a rather disruptive breaking change. This is why we could not implement tidy selections in ggplot2 facetting functions like `facet_grid()` and `facet_wrap()`.
 
 An alternative is to use external defusal of arguments. This is what formula interfaces do for instance. A modelling function takes a formula in a regular argument and the formula defuses the user code:
 
@@ -76,7 +75,7 @@ my_lm <- function(data, f, ...) {
 mtcars |> my_lm(disp ~ drat)
 ```
 
-Once created, the defused expressions contained in the formula are passed around like a normal argument. A similar approach was taken to update `facet_` functions to tidy eval. The `vars()` function (a simple alias to [quos()]) is provided so that users can defuse their arguments externally.
+Once created, the defused expressions contained in the formula are passed around like a normal argument. A similar approach was taken to update `facet_` functions to tidy eval. The `vars()` function (a simple alias to `quos()`) is provided so that users can defuse their arguments externally.
 
 ```r
 ggplot2::facet_grid(
@@ -93,7 +92,7 @@ my_facet_grid <- function(rows, cols, ...) {
 }
 ```
 
-Or it can be spliced with [`!!!`]:
+Or it can be spliced with `!!!`:
 
 ```r
 my_group_by <- function(data, vars) {
@@ -105,11 +104,11 @@ mtcars |> my_group_by(dplyr::vars(cyl, am))
 ```
 
 
-# A non-approach: Parsing lists
+## A non-approach: Parsing lists
 
-Intuitively, many programmers who want to take a list of expressions in a single argument try to defuse an argument and parse it. The user is expected to supply multiple arguments within a `list()` expression. When such a call is detected, the arguments are retrieved and spliced with `!!!`. Otherwise, the user is assumed to have supplied a single argument which is injected with `!!`. An implementation along these lines might look like this: 
+Intuitively, many programmers who want to take a list of expressions in a single argument try to defuse an argument and parse it. The user is expected to supply multiple arguments within a `list()` expression. When such a call is detected, the arguments are retrieved and spliced with `!!!`. Otherwise, the user is assumed to have supplied a single argument which is injected with `!!`. An implementation along these lines might look like this:
 
-```{r, comment = "#>", collapse = TRUE}
+```r
 my_group_by <- function(data, vars) {
   vars <- enquo(vars)
 
@@ -126,10 +125,12 @@ my_group_by <- function(data, vars) {
 
 This does work in simple cases:
 
-```{r, comment = "#>", collapse = TRUE}
+```r
 mtcars |> my_group_by(cyl) |> dplyr::group_vars()
+#> [1] "cyl"
 
 mtcars |> my_group_by(list(cyl, am)) |> dplyr::group_vars()
+#> [1] "cyl" "am"
 ```
 
 However this parsing approach quickly shows limits:

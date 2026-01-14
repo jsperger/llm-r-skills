@@ -1,10 +1,9 @@
-```{r, child = "setup.Rmd", include = FALSE}
-```
+# Quosures
 
-A quosure is a special type of [defused expression][topic-defuse] that keeps track of the original context the expression was written in. The tracking capabilities of quosures is important when interfacing [data-masking][topic-data-mask] functions together because the functions might come from two unrelated environments, like two different packages.
+A quosure is a special type of defused expression that keeps track of the original context the expression was written in. The tracking capabilities of quosures is important when interfacing data-masking functions together because the functions might come from two unrelated environments, like two different packages.
 
 
-# Blending environments
+## Blending environments
 
 Let's take an example where the R user calls the function `summarise_bmi()` from the foo package to summarise a data frame with statistics of a BMI value. Because the `height` variable of their data frame is not in metres, they use a custom function `div100()` to rescale the column.
 
@@ -56,7 +55,7 @@ summarise_stats <- function(data, var) {
 }
 ```
 
-Again the package bar uses a custom function, `check_numeric()`, to validate its input. It also interfaces with data-masking functions from dplyr (using the [define-a-constant][topic-double-evaluation] trick to avoid issues of double evaluation).
+Again the package bar uses a custom function, `check_numeric()`, to validate its input. It also interfaces with data-masking functions from dplyr (using the define-a-constant trick to avoid issues of double evaluation).
 
 There are three data-masking functions simultaneously interfacing in this snippet:
 
@@ -79,14 +78,14 @@ dplyr::transmute(
 The role of quosures is to let R know that `check_numeric()` should be found in the bar package, `bmi()` in the foo package, and `div100()` in the global environment.
 
 
-# When should I create quosures?
+## When should I create quosures?
 
-As a tidyverse user you generally don't need to worry about quosures because `{{` and `...` will create them for you. Introductory texts like [Programming with dplyr](https://dplyr.tidyverse.org/articles/programming.html) or the [standard data-mask programming patterns][topic-data-mask-programming] don't even mention the term. In more complex cases you might need to create quosures with [enquo()] or [enquos()] (even though you generally don't need to know or care that these functions return quosures). In this section, we explore when quosures are necessary in these more advanced applications.
+As a tidyverse user you generally don't need to worry about quosures because `{{` and `...` will create them for you. Introductory texts like [Programming with dplyr](https://dplyr.tidyverse.org/articles/programming.html) or the standard data-mask programming patterns don't even mention the term. In more complex cases you might need to create quosures with `enquo()` or `enquos()` (even though you generally don't need to know or care that these functions return quosures). In this section, we explore when quosures are necessary in these more advanced applications.
 
 
-## Foreign and local expressions
+### Foreign and local expressions
 
-As a rule of thumb, quosures are only needed for arguments defused with [enquo()] or [enquos()] (or with `r link("{{")` which calls `enquo()` implicitly):
+As a rule of thumb, quosures are only needed for arguments defused with `enquo()` or `enquos()` (or with `{{` which calls `enquo()` implicitly):
 
 ```r
 my_function <- function(var) {
@@ -102,7 +101,7 @@ my_function <- function(var) {
 
 Wrapping defused arguments in quosures is needed because expressions supplied as argument comes from a different environment, the environment of your user. For local expressions created in your function, you generally don't need to create quosures:
 
-```{r, comment = "#>", collapse = TRUE}
+```r
 my_mean <- function(data, var) {
   # `expr()` is sufficient, no need for `quo()`
   expr <- expr(mean({{ var }}))
@@ -110,23 +109,28 @@ my_mean <- function(data, var) {
 }
 
 my_mean(mtcars, cyl)
+#> # A tibble: 1 x 1
+#>   `mean(cyl)`
+#>         <dbl>
+#> 1        6.19
 ```
 
-Using [quo()] instead of [expr()] would have worked too but it is superfluous because `dplyr::summarise()`, which uses [enquos()], is already in charge of wrapping your expression within a quosure scoped in your environment.
+Using `quo()` instead of `expr()` would have worked too but it is superfluous because `dplyr::summarise()`, which uses `enquos()`, is already in charge of wrapping your expression within a quosure scoped in your environment.
 
-The same applies if you evaluate manually. By default, [eval()] and [eval_tidy()] capture your environment:
+The same applies if you evaluate manually. By default, `eval()` and `eval_tidy()` capture your environment:
 
-```{r, comment = "#>", collapse = TRUE}
+```r
 my_mean <- function(data, var) {
   expr <- expr(mean({{ var }}))
   eval_tidy(expr, data)
 }
 
 my_mean(mtcars, cyl)
+#> [1] 6.1875
 ```
 
 
-## External defusing
+### External defusing
 
 An exception to this rule of thumb (wrap foreign expressions in quosures, not your own expressions) arises when your function takes multiple expressions in a list instead of `...`. The preferred approach in that case is to take a tidy selection so that users can combine multiple columns using `c()`. If that is not possible, you can take a list of externally defused expressions:
 
@@ -139,54 +143,54 @@ my_group_by <- function(data, vars) {
 mtcars |> my_group_by(dplyr::vars(cyl, am))
 ```
 
-In this pattern, `dplyr::vars()` defuses expressions externally. It creates a list of quosures because the expressions are passed around from function to function like regular arguments. In fact, `dplyr::vars()` and `ggplot2::vars()` are simple aliases of [quos()].
+In this pattern, `dplyr::vars()` defuses expressions externally. It creates a list of quosures because the expressions are passed around from function to function like regular arguments. In fact, `dplyr::vars()` and `ggplot2::vars()` are simple aliases of `quos()`.
 
 ```r
 dplyr::vars(cyl, am)
 #> <list_of<quosure>>
-#> 
+#>
 #> [[1]]
 #> <quosure>
 #> expr: ^cyl
 #> env:  global
-#> 
+#>
 #> [[2]]
 #> <quosure>
 #> expr: ^am
 #> env:  global
 ```
 
-For more information about external defusing, see `r link("topic_multiple_columns")`.
+For more information about external defusing, see topic-multiple-columns.
 
 
-# Technical description of quosures
+## Technical description of quosures
 
 A quosure carries two things:
 
-- An expression (get it with [quo_get_expr()]).
-- An environment (get it with [quo_get_env()]).
+- An expression (get it with `quo_get_expr()`).
+- An environment (get it with `quo_get_env()`).
 
 And implements these behaviours:
 
 - It is _callable_. Evaluation produces a result.
 
-  For historical reasons, [base::eval()] doesn't support quosure evaluation. Quosures currently require [eval_tidy()]. We would like to fix this limitation in the future.
+  For historical reasons, `base::eval()` doesn't support quosure evaluation. Quosures currently require `eval_tidy()`. We would like to fix this limitation in the future.
 
 - It is _hygienic_. It evaluates in the tracked environment.
 
-- It is _maskable_. If evaluated in a data mask (currently only masks created with [eval_tidy()] or [new_data_mask()]), the mask comes first in scope before the quosure environment.
+- It is _maskable_. If evaluated in a data mask (currently only masks created with `eval_tidy()` or `new_data_mask()`), the mask comes first in scope before the quosure environment.
 
   Conceptually, a quosure inherits from two chains of environments, the data mask and the user environment. In practice rlang implements this special scoping by rechaining the top of the data mask to the quosure environment currently under evaluation.
 
 There are similarities between promises (the ones R uses to implement lazy evaluation, not the async expressions from the promises package) and quosures. One important difference is that promises are only evaluated once and cache the result for subsequent evaluation. Quosures behave more like calls and can be evaluated repeatedly, potentially in a different data mask. This property is useful to implement split-apply-combine evaluations.
 
 
-# See also
+## See also
 
-- [enquo()] and [enquos()] to defuse function arguments as quosures. This is the main way quosures are created.
+- `enquo()` and `enquos()` to defuse function arguments as quosures. This is the main way quosures are created.
 
-- [quo()] which is like [expr()] but wraps in a quosure. Usually it is not needed to wrap local expressions yourself.
+- `quo()` which is like `expr()` but wraps in a quosure. Usually it is not needed to wrap local expressions yourself.
 
-- [quo_get_expr()] and [quo_get_env()] to access quosure components.
+- `quo_get_expr()` and `quo_get_env()` to access quosure components.
 
-- [new_quosure()] and [as_quosure()] to assemble a quosure from components.
+- `new_quosure()` and `as_quosure()` to assemble a quosure from components.
