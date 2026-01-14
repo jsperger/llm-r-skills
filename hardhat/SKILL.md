@@ -242,11 +242,19 @@ Standardize prediction output to tidymodels conventions:
 - **r-metaprogramming**: Expression manipulation (if customizing blueprints)
 - **testing-r-packages**: Testing patterns
 
-## Reference Files
+## Vignettes
 
-- [package.Rmd](package.Rmd) - Complete package development guide
-- [mold.Rmd](mold.Rmd) - Detailed mold() documentation
-- [forge.Rmd](forge.Rmd) - Detailed forge() documentation
+Access detailed documentation via R:
+
+```r
+# Open vignette in browser
+RShowDoc("mold", package = "hardhat")    # Molding data for modeling
+RShowDoc("forge", package = "hardhat")   # Forging data for predictions
+RShowDoc("package", package = "hardhat") # Creating modeling packages
+
+# Or browse all vignettes
+browseVignettes("hardhat")
+```
 
 ## External Resources
 
