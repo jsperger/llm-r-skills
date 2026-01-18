@@ -4,11 +4,20 @@ Claude Code plugin providing skills for R programming. Complementary to [Posit s
 
 ## Installation
 
+### Via Marketplace (recommended)
+
+After pushing to GitHub:
+
+```
+/plugin marketplace add jsperger/llm-r-skills
+/plugin install r-skills@r-skills
+```
+
+### Local Development
+
 ```bash
 claude --plugin-dir /path/to/r-skills
 ```
-
-Or add to your Claude Code settings.
 
 ## Skills
 
