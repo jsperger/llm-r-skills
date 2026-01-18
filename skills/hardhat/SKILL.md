@@ -1,5 +1,5 @@
 ---
-name: hardhat-modeling-packages
+name: hardhat
 description: >
   Use when creating an R modeling package that needs standardized preprocessing
   for formula, data frame, matrix, and recipe interfaces. Covers: mold() for

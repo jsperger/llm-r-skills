@@ -1,5 +1,5 @@
 ---
-name: r-metaprogramming
+name: metaprogramming
 description: >
   Use when writing R code that manipulates expressions, builds code
   programmatically, or needs to understand rlang's defuse/inject mechanics.
