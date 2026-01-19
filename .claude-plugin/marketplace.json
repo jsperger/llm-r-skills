@@ -11,7 +11,7 @@
       "name": "r-skills",
       "source": "./",
       "description": "Skills for R programming covering tidyverse patterns, rlang conditions, targets pipelines, metaprogramming, ggplot2, and tidymodels",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": {
         "name": "jsperger"
       },

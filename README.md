@@ -19,6 +19,14 @@ After pushing to GitHub:
 claude --plugin-dir /path/to/r-skills
 ```
 
+### Dependencies
+
+For full functionality, the following are required:
+
+- [languageserver](https://github.com/REditorSupport/languageserver) - R package for LSP support
+- [jq](https://jqlang.org/download/) - JSON processor for hooks
+- [air](https://github.com/posit-dev/air) - R code formatter
+
 ## Skills
 
 ### [designing-tidy-r-functions](skills/designing-tidy-r-functions)
