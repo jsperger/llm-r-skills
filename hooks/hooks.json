@@ -8,7 +8,7 @@
           {
             "type": "command",
             "command": "air format .",
-            "timeout": 30
+            "timeout": 20
           }
         ]
       }

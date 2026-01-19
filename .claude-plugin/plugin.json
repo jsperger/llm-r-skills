@@ -9,7 +9,7 @@
   "repository": "https://github.com/jsperger/llm-r-skills",
   "license": "MIT",
   "keywords": ["r", "rlang", "tidyverse", "tidymodels", "targets", "ggplot2"],
-  "hooks": "./hooks/",
+  "hooks": "./hooks/hooks.json",
   "skills": "./skills/",
   "lspServers": "./.lsp.json"
 }
