@@ -1,12 +1,14 @@
 {
+  "description": "Automatic code formatting with air",
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "Edit|Write",
+        "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.R$'; then air format \"$file_path\"; fi; }"
+            "command": "air format .",
+            "timeout": 30
           }
         ]
       }
