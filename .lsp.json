@@ -1,0 +1,10 @@
+{
+  "R": {
+    "command": "R",
+    "args": ["--no-echo", "-e", "languageserver::run()"],
+    "extensionToLanguage": {
+      ".R": "R",
+      ".r": "R"
+    }
+  }
+}
