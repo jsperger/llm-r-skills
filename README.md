@@ -6,8 +6,6 @@ Claude Code plugin providing skills for R programming. Complementary to [Posit s
 
 ### Via Marketplace (recommended)
 
-After pushing to GitHub:
-
 ```
 /plugin marketplace add jsperger/llm-r-skills
 /plugin install r-skills@r-skills
@@ -38,6 +36,9 @@ ggplot2 4.0+ features including S7 migration, theme defaults, and new scale/posi
 ### [hardhat](skills/hardhat)
 Infrastructure for building `tidymodels`-compatible modeling packages using `mold()` and `forge()`.
 
+### [r-languageserver](skills/r-languageserver)
+Instructions for using the language server and avoiding common agent operator pitfalls such as not positioning the cursor on a symbol.
+
 ### [metaprogramming](skills/metaprogramming)
 Techniques for manipulating R expressions using `rlang`: defuse-and-inject pattern, quosures, and symbol construction.
 
@@ -45,10 +46,16 @@ Techniques for manipulating R expressions using `rlang`: defuse-and-inject patte
 Error handling with `rlang` and `cli`: formatted output, error chaining, and input validation.
 
 ### [targets-pipelines](skills/targets-pipelines)
-Complex `targets` patterns: static branching, dynamic branching, hybrid patterns, and custom target factories.
+Complex `targets` patterns: static branching, dynamic branching, hybrid patterns, and custom target factories. 
+
+This is a work-in-progress and doesn't cover basic `targets` functionality; it's targeted to some pain points I've kept running into trying to get LLMs to write target definitions. It covers branching and a few of the `tarchetypes` branching-related target factories. 
 
 ### [tidy-evaluation](skills/tidy-evaluation)
 Programming patterns for data-masked functions in the tidyverse using `{{}}` and managing variable ambiguity.
 
+
+
 ### [tidymodels-overview](skills/tidymodels-overview)
 Overview of the tidymodels ecosystem for machine learning in R.
+
+
