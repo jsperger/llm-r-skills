@@ -5,6 +5,9 @@
     "extensionToLanguage": {
       ".R": "R",
       ".r": "R"
+    },
+    "settings": {
+      "r.lsp.diagnostics": false
     }
   }
 }

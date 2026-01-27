@@ -1,5 +1,5 @@
 {
-  "description": "Automatic code formatting with air",
+  "description": "R code formatting with air and linting with lintr",
   "hooks": {
     "PostToolUse": [
       {
@@ -7,8 +7,20 @@
         "hooks": [
           {
             "type": "command",
-            "command": "air format .",
-            "timeout": 20
+            "command": "\"$CLAUDE_PLUGIN_ROOT\"/scripts/lint_and_format_r_file.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PLUGIN_ROOT\"/scripts/air-format-dir.sh",
+            "timeout": 15
           }
         ]
       }
