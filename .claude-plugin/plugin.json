@@ -1,6 +1,6 @@
 {
   "name": "r-skills",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Skills, commands, and agents for R programming with Claude Code",
   "author": {
     "name": "jsperger"

@@ -2,6 +2,12 @@
 
 ## []
 
+## [0.3.2] - 2026-01-28
+
+### Changed
+
+- Documentation agent instructions to better align with tidyverse style guide.
+
 ## [0.3.1] - 2026-01-28
 
 ### Fixed

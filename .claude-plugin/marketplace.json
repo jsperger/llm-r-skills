@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Skills, commands, and agents for R programming with Claude Code",
-    "version": "0.3.1"
+    "version": "0.3.2"
   },
   "plugins": [
     {
