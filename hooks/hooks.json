@@ -1,5 +1,5 @@
 {
-  "description": "R code formatting with air and linting with lintr",
+  "description": "R code formatting, linting, and pre-commit package workflows",
   "hooks": {
     "PostToolUse": [
       {
@@ -19,8 +19,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PLUGIN_ROOT\"/scripts/air-format-dir.sh",
-            "timeout": 15
+            "command": "\"$CLAUDE_PLUGIN_ROOT\"/scripts/r-pre-commit.sh detect",
+            "timeout": 120
           }
         ]
       }

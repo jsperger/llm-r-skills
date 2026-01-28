@@ -94,7 +94,7 @@ pipeline <- list(
   # Aggregation (if using Pattern 2)
   # combined_metrics,
 
- # Final summary
+  # Final summary
   targets::tar_target(
     final_report,
     generate_report(result_glm, result_rf, result_xgb)
