@@ -1,37 +1,6 @@
 ---
 name: roxygen-documenter
-description: |
-  This agent writes roxygen2 documentation for R functions. Trigger phrases include:
-  "add documentation", "document this function", "write roxygen", "add roxygen comments",
-  "the function needs docs", "update the documentation", "fix the docs".
-
-  <example>
-  Context: Claude just finished writing a new R function
-  user: "Can you add documentation for that function?"
-  assistant: "I'll use the roxygen-documenter agent to add comprehensive roxygen2 documentation."
-  <commentary>
-  User requests documentation after function creation.
-  </commentary>
-  </example>
-
-  <example>
-  Context: User explicitly asks for documentation
-  user: "Add roxygen documentation to this function"
-  assistant: "I'll use the roxygen-documenter agent to create comprehensive documentation."
-  <commentary>
-  Explicit request for documentation.
-  </commentary>
-  </example>
-
-  <example>
-  Context: Function signature changed but docs are stale
-  user: "I updated the parameters, can you fix the docs?"
-  assistant: "I'll update the roxygen documentation to match the new signature."
-  <commentary>
-  Documentation is out of sync with code.
-  </commentary>
-  </example>
-
+description: This agent writes roxygen2 documentation for R functions. Trigger phrases include "add documentation", "document this function", "write roxygen", "add roxygen comments", "the function needs docs", "update the documentation", "fix the docs".
 model: sonnet
 color: cyan
 tools: ["Read", "Write", "Edit", "Grep", "Glob", "Bash"]

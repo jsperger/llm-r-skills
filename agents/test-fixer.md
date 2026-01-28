@@ -1,36 +1,8 @@
 ---
 name: test-fixer
-description: |
-  Use this agent when R package tests are failing and need diagnosis and fixes. Examples:
-
-  <example>
-  Context: User is working on an R package and tests are failing
-  user: "The tests are failing, can you help?"
-  assistant: "I'll use the test-fixer agent to diagnose and fix the failing tests."
-  <commentary>
-  Tests are explicitly failing and user needs help fixing them.
-  </commentary>
-  </example>
-
-  <example>
-  Context: Pre-commit hook reported test failures
-  user: "The commit was blocked because of test failures"
-  assistant: "I'll launch the test-fixer agent to analyze and fix the test failures."
-  <commentary>
-  Hook reported failures, agent can systematically diagnose and fix.
-  </commentary>
-  </example>
-
-  <example>
-  Context: User mentions specific test errors
-  user: "test-data-validation.R is failing with 'object not found'"
-  assistant: "I'll use the test-fixer agent to investigate this specific test failure."
-  <commentary>
-  Specific test failure mentioned, agent can focus on that file.
-  </commentary>
-  </example>
-
+description: Use this agent when R package tests are failing and need diagnosis and fixes. 
 model: inherit
+skills: r-package-development, testing-r-packages
 color: yellow
 tools: ["Read", "Write", "Edit", "Grep", "Glob", "Bash"]
 ---
