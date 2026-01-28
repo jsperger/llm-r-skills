@@ -18,14 +18,7 @@
       },
       "repository": "https://github.com/jsperger/llm-r-skills",
       "license": "MIT",
-      "keywords": ["language server", "R", "rlang", "tidyverse", "tidymodels", "devtools", "testthat", "roxygen2"],
-      "category": "development",
-      "strict": false,
-      "skills": "./skills/",
-      "commands": "./commands/",
-      "agents": "./agents/",
-      "hooks": "./hooks/hooks.json",
-      "lspServers": "./.lsp.json"
+      "category": "development"
     }
   ]
 }
