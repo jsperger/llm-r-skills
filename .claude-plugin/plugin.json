@@ -9,7 +9,5 @@
   "license": "MIT",
   "keywords": ["R", "rlang", "tidyverse", "tidymodels", "devtools", "testthat"],
   "skills": "./skills/",
-  "commands": "./commands/",
-  "agents": "./agents/",
   "lspServers": "./.lsp.json"
 }
