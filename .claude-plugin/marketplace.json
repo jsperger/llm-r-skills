@@ -4,24 +4,27 @@
     "name": "jsperger"
   },
   "metadata": {
-    "description": "Skills for R programming with Claude Code",
-    "version": "0.2.0"
+    "description": "Skills, commands, and agents for R programming with Claude Code",
+    "version": "0.3.0"
   },
   "plugins": [
     {
       "name": "r-skills",
       "source": "./",
-      "description": "Skills for R programming covering tidyverse patterns, rlang conditions, targets pipelines, metaprogramming, ggplot2, and tidymodels",
-      "version": "0.2.0-test",
+      "description": "Skills for R programming covering tidyverse patterns, rlang conditions, targets pipelines, metaprogramming, ggplot2, tidymodels, and package development. Includes automated pre-commit workflows and test-fixing agents.",
+      "version": "0.3.0",
       "author": {
         "name": "jsperger"
       },
       "repository": "https://github.com/jsperger/llm-r-skills",
       "license": "MIT",
-      "keywords": ["language server", "R", "rlang", "tidyverse", "tidymodels"],
+      "keywords": ["language server", "R", "rlang", "tidyverse", "tidymodels", "devtools", "testthat", "roxygen2"],
       "category": "development",
       "strict": false,
       "skills": "./skills/",
+      "commands": "./commands/",
+      "agents": "./agents/",
+      "hooks": "./hooks/hooks.json",
       "lspServers": "./.lsp.json"
     }
   ]

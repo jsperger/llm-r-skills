@@ -1,0 +1,16 @@
+{
+  "name": "r-skills",
+  "version": "0.3.0",
+  "description": "Skills, commands, and agents for R programming with Claude Code",
+  "author": {
+    "name": "jsperger"
+  },
+  "repository": "https://github.com/jsperger/llm-r-skills",
+  "license": "MIT",
+  "keywords": ["R", "rlang", "tidyverse", "tidymodels", "devtools", "testthat"],
+  "skills": "./skills/",
+  "commands": "./commands/",
+  "agents": "./agents/",
+  "hooks": "./hooks/hooks.json",
+  "lspServers": "./.lsp.json"
+}

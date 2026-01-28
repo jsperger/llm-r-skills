@@ -1,6 +1,13 @@
 # r-skills
 
-Claude Code plugin providing skills for R programming. Complementary to [Posit skills](https://github.com/posit-dev/skills).
+Claude Code plugin providing skills, commands, and agents for R programming. Complementary to [Posit skills](https://github.com/posit-dev/skills).
+
+## Features
+
+- **Skills**: Domain knowledge for tidyverse patterns, package development, rlang, targets, and more
+- **Commands**: Slash commands for fixing tests, adding tests, and LSP diagnostics
+- **Agents**: Autonomous agents for test fixing and roxygen2 documentation
+- **Hooks**: Automatic R code formatting, documentation, and testing before commits/PRs
 
 ## Installation
 
@@ -22,8 +29,56 @@ claude --plugin-dir /path/to/r-skills
 For full functionality, the following are required:
 
 - [languageserver](https://github.com/REditorSupport/languageserver) - R package for LSP support
+- [lintr](https://lintr.r-lib.org/) - R linter for diagnostics
 - [jq](https://jqlang.org/download/) - JSON processor for hooks
 - [air](https://github.com/posit-dev/air) - R code formatter
+
+Install R packages:
+```r
+install.packages(c("languageserver", "lintr", "devtools", "testthat"))
+```
+
+## Commands
+
+### `/r-fix-tests [package-path]`
+Diagnose and fix failing R package tests. Runs the test suite, analyzes failures, and implements fixes.
+
+### `/r-add-tests [file-or-function]`
+Add testthat tests for an R function or file. Analyzes the code and generates comprehensive test coverage.
+
+### `/r-lsp-diagnose`
+Test R Language Server connectivity and diagnose issues. Checks R installation, languageserver package, and configuration.
+
+## Agents
+
+### test-fixer
+Autonomous agent for diagnosing and fixing failing tests. Triggers on:
+- "my tests are failing"
+- "commit was blocked because of test failures"
+- Specific test file errors
+
+### roxygen-documenter
+Agent for writing roxygen2 documentation. Triggers on:
+- "add documentation to this function"
+- "write roxygen comments"
+- "update the documentation"
+
+## Hooks
+
+### Pre-commit Workflow
+Before `git commit` or `gh pr create`:
+1. Format all R files with `air`
+2. Run `devtools::document()` on packages with R/ changes
+3. Run `devtools::test()` on affected packages
+
+**Behavior:**
+- Commits: Warn on test failures (allow commit to proceed)
+- PRs: Block if tests fail
+
+### Post-edit Workflow
+After editing R files (Write|Edit):
+1. Format with `air`
+2. Lint with `lintr`
 
 ## Skills
 
@@ -58,4 +113,5 @@ Programming patterns for data-masked functions in the tidyverse using `{{}}` and
 ### [tidymodels-overview](skills/tidymodels-overview)
 Overview of the tidymodels ecosystem for machine learning in R.
 
-
+### [r-package-development](skills/r-package-development)
+R package development workflows: devtools, testthat 3 patterns, roxygen2 documentation, usethis helpers, and monorepo organization.
