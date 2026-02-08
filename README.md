@@ -63,6 +63,18 @@ Agent for writing roxygen2 documentation. Triggers on:
 - "write roxygen comments"
 - "update the documentation"
 
+### recipe-step-builder
+Scaffolds and implements custom `step_*()` functions for the recipes package. Triggers on:
+- "create a custom recipe step"
+- "add a step_lag() to my package"
+- "my custom recipe step isn't working"
+
+### recipe-step-tester
+Writes comprehensive testthat test suites for custom recipe steps. Triggers on:
+- "write tests for my step_winsorize()"
+- "my step tests need better coverage"
+- "add tests for the step we just created"
+
 ## Hooks
 
 ### Pre-commit Workflow
@@ -109,6 +121,12 @@ This is a work-in-progress and doesn't cover basic `targets` functionality; it's
 Programming patterns for data-masked functions in the tidyverse using `{{}}` and managing variable ambiguity.
 
 
+
+### [building-recipe-steps](skills/building-recipe-steps)
+Reference for developing custom `step_*()` functions for the recipes package. Includes implementation templates, test templates, and a development checklist. Loaded by the `recipe-step-builder` agent.
+
+### [recipes-feature-engineering](skills/recipes-feature-engineering)
+Feature engineering with recipes in tidymodels pipelines: define-prep-bake lifecycle, variable selection, roles, step ordering, and common recipe patterns.
 
 ### [tidymodels-overview](skills/tidymodels-overview)
 Overview of the tidymodels ecosystem for machine learning in R.

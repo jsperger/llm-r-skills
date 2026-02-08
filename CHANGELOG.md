@@ -1,6 +1,20 @@
 # CHANGELOG
 
-## []
+## [0.4.0] - 2026-02-08
+
+### Added
+
+- **Agent**: `recipe-step-builder` - Autonomous agent for scaffolding, implementing, and validating custom `step_*()` functions for the recipes package
+- **Agent**: `recipe-step-tester` - Testing specialist agent that writes comprehensive testthat test suites for custom recipe steps
+- **Reference**: `building-recipe-steps/reference/testing-recipe-steps.md` - Testing guide covering 10 test categories for custom steps, with expectations reference and snapshot patterns
+- **Reference**: `recipes-feature-engineering/references/pipeline-examples.md` - Complete tidymodels pipeline examples (tuning, workflowsets, stacking, validation sets)
+
+### Changed
+
+- **Skill**: `recipes-feature-engineering` - Rewritten to emphasize tidymodels pipeline context. Added workflow integration section, separated step ordering (factor level handling now distinct from dummy encoding), added common recipe patterns by task
+- **Skill**: `building-recipe-steps` - Slimmed down to a reference skill loaded by the `recipe-step-builder` agent. Detailed implementation guidance moved to templates and reference files
+- **Templates**: Updated `STEP_TEMPLATE.R` and `TEST_TEMPLATE.R` to current recipes API (`recipes_eval_select()` instead of deprecated `terms_select()`, `enquos(...)` instead of `ellipses_check(...)`). Switched placeholders from `{{...}}` to uppercase identifiers (`STEPNAME`, `ACTIONDESC`, `PKGNAME`) to prevent `air` formatter from mangling template syntax
+- **Reference**: `building-recipe-steps/reference/CHECKLIST.md` - Updated to current API, added integration tests and tunable parameter sections
 
 ## [0.3.2] - 2026-01-28
 
