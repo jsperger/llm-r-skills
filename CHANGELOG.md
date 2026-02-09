@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.4.1] - 2026-02-08
+### Changed
+- Removed  `r.lsp.diagnostics": false` from lsp settings because it seems to break the whole lsp. 
+
 ## [0.4.0] - 2026-02-08
 
 ### Added
