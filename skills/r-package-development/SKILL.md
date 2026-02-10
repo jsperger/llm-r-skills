@@ -1,8 +1,9 @@
 ---
 name: r-package-development
-description: |
-  This skill should be used when the user is working on R package development, including tasks like "create an R package", "add a function to my package", "write tests", "document functions", "run devtools::check()", "fix R CMD check errors", "set up testthat", "add roxygen documentation", "configure DESCRIPTION", or needs guidance on devtools workflows, testthat patterns, roxygen2 tags, usethis helpers, or monorepo package organization.
-version: 1.0.0
+description: >
+  Understand R package development workflow. Use when developing an R package  including tasks like "add a function to my package", "write tests", "document functions", "run devtools::check()", "fix R CMD check errors", "configure DESCRIPTION", or needs guidance on devtools workflows, testthat patterns, roxygen2 tags, usethis helpers.
+version: "0.2.0"
+
 ---
 
 # R Package Development

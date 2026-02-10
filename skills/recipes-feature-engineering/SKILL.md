@@ -1,8 +1,10 @@
 ---
 name: recipes-feature-engineering
-description: This skill should be used when writing feature engineering or preprocessing code with the recipes package as part of a tidymodels pipeline. Applicable when the user asks to "build a recipe", "add preprocessing steps", "create a recipe for my workflow", "feature engineering with recipes", "step ordering", "handle missing values in a recipe", "encode categorical variables", "normalize predictors", or when using recipe functions like recipe(), step_normalize(), step_dummy(), step_impute_*, prep(), bake() within a tidymodels workflow. Does NOT cover custom step development (see building-recipe-steps skill).
----
+description: >
+Write feature engineering or preprocessing steps with the R recipes package. Encode categorical variables, impute missing data, and transform data as part of an R tidymodels workflow or prepare data on its own with `prep()` and `bake()`. 
+version: "0.2.0"
 
+---
 # Feature Engineering with recipes in Tidymodels
 
 The recipes package defines preprocessing as a specification that integrates into tidymodels workflows. A recipe is a **plan**, not an action — transformations execute only when `prep()` estimates parameters and `bake()` applies them.

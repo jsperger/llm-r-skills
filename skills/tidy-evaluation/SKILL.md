@@ -1,13 +1,10 @@
 ---
 name: tidy-evaluation
 description: >
-  Use when programming with tidyverse data-masked functions (dplyr, ggplot2,
-  tidyr) and need to pass column references through functions. Covers:
-  forwarding patterns with {{ and ..., names patterns with .data/.env pronouns,
-  bridge patterns with across()/all_of(), double evaluation and ambiguity
-  pitfalls. Does NOT cover: expression mechanics (r-metaprogramming), error
-  handling (rlang-conditions), function design (designing-tidy-r-functions).
+  Write data-masked R functions that allow users to you refer to data frame columns as if they were regular objects. Use to avoid passing column names as strings.  Covers:  forwarding patterns with {{ and ..., names patterns with .data/.env pronouns,  bridge patterns with across()/all_of(), double evaluation and ambiguity pitfalls. Use whenever the user asks to rewrite an R function to avoid passing strings as arguments. 
 dependencies: R>=4.3, rlang>=1.1.3
+version: "0.2.0"
+
 ---
 
 # Tidy Evaluation Programming Patterns

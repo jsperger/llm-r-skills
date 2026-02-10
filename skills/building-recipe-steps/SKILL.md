@@ -1,6 +1,9 @@
 ---
 name: building-recipe-steps
-description: This skill provides reference material for building custom recipe steps for the recipes package in R. It is loaded by the recipe-step-builder agent. Contains templates, a development checklist, and implementation guidance for the S3 class structure required by custom `step_*()` functions.
+description: >
+Develop custom R `recipes` `step_*()` functions for preprocessing. Use when adding new functionality that extends `recipes` and tidymodels. 
+version: "0.2.0"
+
 ---
 
 # Building Custom Recipe Steps

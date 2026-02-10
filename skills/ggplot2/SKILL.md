@@ -1,6 +1,9 @@
 ---
 name: ggplot2
-description: Use when working with R ggplot2 package, especially ggplot2 4.0+ features. Covers S7 migration (@ property access), theme defaults with ink/paper/accent, element_geom(), from_theme(), theme shortcuts (theme_sub_*), palette themes, labels with dictionary/attributes, discrete scale improvements (palette, continuous.limits, minor_breaks, sec.axis), position aesthetics (nudge_x/nudge_y, order), facet_wrap dir/space/layout, boxplot/violin/label styling, stat_manual(), stat_connect(), coord reversal.
+description: > 
+Create plots with R ggplot2 4.0+ features. Migrate an R package's existing plotting functions to use ggplot2 4.0+ features including S7 objects (@ property access), new theme shortcuts, labels with dictionary/attributes, and discrete scale improvements. 
+version: "0.2.0"
+
 ---
 
 # ggplot2 Reference

@@ -1,11 +1,9 @@
 ---
 name: r-languageserver
 description: >
-  This skill should be used when navigating R code, finding function definitions,
-  understanding call hierarchies, exploring package dependencies, or performing
-  impact analysis before refactoring R code. Covers LSP operations: hover,
-  goToDefinition, findReferences, documentSymbol, workspaceSymbol, incomingCalls,
-  outgoingCalls, and prepareCallHierarchy.
+  Navigate R code, find R function definitions, understand R call hierarchies, or explore R package dependencies. Perform impact analysis before refactoring R code. Use when working with R code. 
+version: "0.2.0"
+
 ---
 
 # R Language Server Protocol Integration

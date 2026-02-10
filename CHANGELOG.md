@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [0.5.0] - 2026-02-10
+### Added 
+- Skills now have version numbers in their frontmatter
+
+### Changed 
+- Skill descriptions have been rewritten to be shorter and emphasize action. 
+
 ## [0.4.1] - 2026-02-08
 ### Changed
 - Removed  `r.lsp.diagnostics": false` from lsp settings because it seems to break the whole lsp. 

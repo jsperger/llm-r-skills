@@ -3,9 +3,9 @@ name: designing-tidy-r-functions
 description: >
   Use when designing R function APIs, reviewing R code for design issues,
   writing functions for R packages, or evaluating argument ordering and
-  naming decisions. Does NOT cover: style/linting, error handling
-  (rlang-conditions), CLI output (r-lib:cli), testing (testing-r-packages),
-  CRAN compliance (cran-extrachecks).
+  naming decisions. 
+version: "0.2.0"
+
 ---
 
 # Tidy R Function Design

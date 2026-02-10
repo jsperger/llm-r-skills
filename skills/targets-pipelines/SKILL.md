@@ -1,13 +1,13 @@
 ---
 name: targets-pipelines
 description: >
-  Use when writing complex targets pipelines with branching, batching, or custom
-  target factories. Symptoms: multiple similar targets, parameter sweeps, method
-  comparisons, simulation studies. Covers: static branching (tar_map/tar_combine),
+  Use when writing complex R targets pipelines with branching, batching, or custom
+  target factories. Covers: static branching (tar_map/tar_combine),
   dynamic branching (pattern argument), hybrid patterns, custom target factories,
-  pipeline debugging. Does NOT cover: basic targets usage, HPC deployment,
-  package development workflows (see targetopia-packages.md).
+  pipeline debugging. Does NOT cover basic targets usage.
 dependencies: R>=4.3, targets>=1.9.0, tarchetypes>=0.12.0
+version: "0.2.0"
+
 ---
 
 # Complex targets Pipelines

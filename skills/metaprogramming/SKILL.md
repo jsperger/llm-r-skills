@@ -1,13 +1,13 @@
 ---
 name: metaprogramming
 description: >
-  Use when writing R code that manipulates expressions, builds code
+  Write R code that manipulates expressions, builds code
   programmatically, or needs to understand rlang's defuse/inject mechanics.
   Covers: defusing with expr()/enquo()/enquos(), quosure environment tracking,
-  injection with !!/!!!/{{, symbol construction with sym()/syms(). Does NOT
-  cover: data-mask programming patterns (tidy-evaluation), error handling
-  (rlang-conditions), function design (designing-tidy-r-functions).
+  injection with !!/!!!/{{, symbol construction with sym()/syms(). 
 dependencies: R>=4.3, rlang>=1.1.3
+version: "0.2.0"
+
 ---
 
 # R Metaprogramming with rlang

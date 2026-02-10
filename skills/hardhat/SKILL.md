@@ -6,6 +6,8 @@ description: >
   training data preprocessing, forge() for prediction data validation,
   blueprints, model constructors, spruce functions for output formatting.
 dependencies: R>=4.3, hardhat>=1.4.2
+version: "0.2.0"
+
 ---
 
 # Creating Modeling Packages with hardhat

@@ -1,13 +1,15 @@
 ---
 name: rlang-conditions
 description: >
-  Use when developing R packages that need to handle errors, warnings, and
-  conditions properly. Covers: (1) cli_abort/cli_warn/cli_inform for throwing
+  Write R functions with proper handling of errors, warnings, and
+  conditions. Covers: (1) cli_abort/cli_warn/cli_inform for throwing
   conditions with formatting, (2) Error call context with caller_env() and
   caller_arg(), (3) Input validation helpers that report the right function,
   (4) Error chaining with try_fetch() and parent argument,
   (5) Testing error conditions with testthat snapshots.
 dependencies: R>=4.3, rlang>=1.1.3
+version: "0.2.0"
+
 ---
 
 # Condition Handling in R Packages
