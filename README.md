@@ -133,3 +133,6 @@ Overview of the tidymodels ecosystem for machine learning in R.
 
 ### [r-package-development](skills/r-package-development)
 R package development workflows: devtools, testthat 3 patterns, roxygen2 documentation, usethis helpers, and monorepo organization.
+
+### [s7-objects](skills/s7-objects)
+Creating R classes, generics, and methods with the S7 object system. Covers `new_class()`, `new_generic()`, `method()`, typed properties, validators, custom constructors, `super()` dispatch, and S3/S4 interoperability.

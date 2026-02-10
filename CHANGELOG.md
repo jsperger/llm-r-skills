@@ -1,11 +1,15 @@
 # CHANGELOG
 
+## [0.6.0] - 2026-02-10
+### Added
+- **Skill**: `s7-objects` - Creating R classes, generics, and methods with the S7 object system. Covers `new_class()`, `new_generic()`, `method()`, typed properties, validators, custom constructors, `super()` dispatch, and S3/S4 interoperability.
+
 ## [0.5.0] - 2026-02-10
-### Added 
+### Added
 - Skills now have version numbers in their frontmatter
 
-### Changed 
-- Skill descriptions have been rewritten to be shorter and emphasize action. 
+### Changed
+- Skill descriptions have been rewritten to be shorter and emphasize action.
 
 ## [0.4.1] - 2026-02-08
 ### Changed
