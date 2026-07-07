@@ -41,6 +41,9 @@ Infrastructure for building `tidymodels`-compatible modeling packages using `mol
 ### [metaprogramming](skills/metaprogramming)
 Techniques for manipulating R expressions using `rlang`: defuse-and-inject pattern, quosures, and symbol construction.
 
+### [r-languageserver](skills/r-languageserver)
+Using the R language server to navigate code: find definitions and references, understand call hierarchies, and run impact analysis before refactoring. Helps Claude discover LSP functionality the plugin alone did not surface.
+
 ### [rlang-conditions](skills/rlang-conditions)
 Error handling with `rlang` and `cli`: formatted output, error chaining, and input validation.
 
@@ -52,3 +55,8 @@ Programming patterns for data-masked functions in the tidyverse using `{{}}` and
 
 ### [tidymodels-overview](skills/tidymodels-overview)
 Overview of the tidymodels ecosystem for machine learning in R.
+
+## Commands
+
+### `/r-lsp-diagnose`
+Diagnose R language server connectivity and configuration, and suggest fixes. Runs `scripts/lsp-test-harness.sh`, which exercises core LSP functionality and reports results as JSON (pass `--fix` to attempt repairs).
