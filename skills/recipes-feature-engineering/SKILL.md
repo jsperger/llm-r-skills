@@ -1,7 +1,7 @@
 ---
 name: recipes-feature-engineering
 description: >
-Write feature engineering or preprocessing steps with the R recipes package. Encode categorical variables, impute missing data, and transform data as part of an R tidymodels workflow or prepare data on its own with `prep()` and `bake()`. 
+  Write feature engineering or preprocessing steps with the R recipes package. Encode categorical variables, impute missing data, and transform data as part of an R tidymodels workflow or prepare data on its own with `prep()` and `bake()`.
 version: "0.2.0"
 
 ---

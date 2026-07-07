@@ -1,5 +1,5 @@
 ---
-name: creating-s7-objects
+name: s7-objects
 description: Use when creating R classes, generics, or methods with the S7 object system. Triggers on new_class, new_generic, new_property, method(), S7_dispatch, or requests for formal R objects in packages using S7. CRITICAL disambiguation — S7 uses its own syntax, NOT S3 (no UseMethod, no structure, no $) and NOT S4 (no setClass, no setGeneric, no slots). The @ operator in S7 accesses typed properties, not S4 slots.
 version: "0.1.0"
 

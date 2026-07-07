@@ -2,7 +2,7 @@
 name: test-fixer
 description: Use this agent when R package tests are failing and need diagnosis and fixes. 
 model: inherit
-skills: r-package-development, testing-r-packages
+skills: r-package-development
 color: yellow
 tools: ["Read", "Write", "Edit", "Grep", "Glob", "Bash"]
 ---

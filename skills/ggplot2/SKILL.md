@@ -1,7 +1,7 @@
 ---
 name: ggplot2
-description: > 
-Create plots with R ggplot2 4.0+ features. Migrate an R package's existing plotting functions to use ggplot2 4.0+ features including S7 objects (@ property access), new theme shortcuts, labels with dictionary/attributes, and discrete scale improvements. 
+description: >
+  Create plots with R ggplot2 4.0+ features. Migrate an R package's existing plotting functions to use ggplot2 4.0+ features including S7 objects (@ property access), new theme shortcuts, labels with dictionary/attributes, and discrete scale improvements.
 version: "0.2.0"
 
 ---

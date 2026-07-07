@@ -1,7 +1,7 @@
 ---
 name: building-recipe-steps
 description: >
-Develop custom R `recipes` `step_*()` functions for preprocessing. Use when adding new functionality that extends `recipes` and tidymodels. 
+  Develop custom R `recipes` `step_*()` functions for preprocessing. Use when adding new functionality that extends `recipes` and tidymodels.
 version: "0.2.0"
 
 ---

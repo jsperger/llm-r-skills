@@ -1,7 +1,7 @@
 ---
 name: tidymodels-overview
 description: >
-Understand the R tidymodels package ecosystem. This skill should be used when working with R tidymodels packages, including when the user asks to "create a tidymodels workflow", "build a recipe", "tune a model", "use parsnip", "set up resampling", "create a workflow_set", "compare models", "stack models", or mentions tidymodels packages like recipes, parsnip, workflows, workflowsets, tune, rsample, yardstick, or stacks. 
+  Understand the R tidymodels package ecosystem. This skill should be used when working with R tidymodels packages, including when the user asks to "create a tidymodels workflow", "build a recipe", "tune a model", "use parsnip", "set up resampling", "create a workflow_set", "compare models", "stack models", or mentions tidymodels packages like recipes, parsnip, workflows, workflowsets, tune, rsample, yardstick, or stacks.
 version: "0.2.0"
 
 ---
