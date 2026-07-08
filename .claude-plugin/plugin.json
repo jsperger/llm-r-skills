@@ -1,6 +1,6 @@
 {
   "name": "r-skills",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Skills for R programming covering tidyverse patterns, rlang conditions, targets pipelines, metaprogramming, and more",
   "author": {
     "name": "jsperger",
