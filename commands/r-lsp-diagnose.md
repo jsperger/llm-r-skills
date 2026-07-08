@@ -46,6 +46,11 @@ install.packages("lintr")
 - Check .lsp.json for valid JSON syntax
 - Verify languageserver settings are correct
 
-If user confirms fixes should be attempted, run: !`"$CLAUDE_PLUGIN_ROOT"/scripts/lsp-test-harness.sh --fix`
+If any test failed, ask the user whether to attempt automatic fixes. Only if they
+confirm, run this with the Bash tool (it installs R packages from CRAN):
+
+```
+"$CLAUDE_PLUGIN_ROOT"/scripts/lsp-test-harness.sh --fix
+```
 
 After any fixes, suggest restarting Claude Code to reload the LSP.

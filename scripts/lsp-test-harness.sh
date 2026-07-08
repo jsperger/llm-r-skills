@@ -12,6 +12,22 @@ if [[ "${1:-}" == "--fix" ]]; then
   fix_mode=true
 fi
 
+# jq is required to build the report. Without it we cannot use add_result, so
+# emit a hand-rolled result and exit 0 (callers expect JSON on stdout).
+if ! command -v jq &>/dev/null; then
+  printf '%s\n' '{"summary":"jq is required but not installed.","all_passed":false,"tests":[{"name":"jq","passed":false,"message":"jq is not installed or not in PATH","fix":"Install jq (e.g. brew install jq)"}]}'
+  exit 0
+fi
+
+# Locate a timeout implementation. macOS has neither unless coreutils is
+# installed, in which case it is gtimeout.
+timeout_cmd=()
+if command -v timeout &>/dev/null; then
+  timeout_cmd=(timeout 5)
+elif command -v gtimeout &>/dev/null; then
+  timeout_cmd=(gtimeout 5)
+fi
+
 # Results accumulator
 results=()
 all_passed=true
@@ -44,7 +60,10 @@ else
 fi
 
 # Test 2: Check if languageserver package is installed
-if Rscript -e "library(languageserver)" 2>/dev/null; then
+if ! command -v Rscript &>/dev/null; then
+  add_result "languageserver Package" false "Cannot check: Rscript is not in PATH" \
+    "Install R first, then install.packages('languageserver')"
+elif Rscript -e "library(languageserver)" 2>/dev/null; then
   ls_version=$(Rscript -e "cat(as.character(packageVersion('languageserver')))" 2>/dev/null)
   add_result "languageserver Package" true "Version $ls_version installed"
 else
@@ -58,7 +77,10 @@ else
 fi
 
 # Test 3: Check if lintr is installed (for diagnostics)
-if Rscript -e "library(lintr)" 2>/dev/null; then
+if ! command -v Rscript &>/dev/null; then
+  add_result "lintr Package" false "Cannot check: Rscript is not in PATH" \
+    "Install R first, then install.packages('lintr')"
+elif Rscript -e "library(lintr)" 2>/dev/null; then
   lintr_version=$(Rscript -e "cat(as.character(packageVersion('lintr')))" 2>/dev/null)
   add_result "lintr Package" true "Version $lintr_version installed"
 else
@@ -72,16 +94,23 @@ else
 fi
 
 # Test 4: Check if LSP can start
-lsp_test=$(timeout 5 Rscript -e "
-  suppressMessages(library(languageserver))
-  cat('LSP can start')
-" 2>&1) || lsp_test=""
-
-if [[ "$lsp_test" == *"LSP can start"* ]]; then
-  add_result "LSP Startup" true "Language server can initialize"
+# ${arr[@]+"${arr[@]}"} keeps an empty timeout_cmd from tripping `set -u` on
+# bash 3.2, which is what macOS ships as /bin/bash.
+if ! command -v Rscript &>/dev/null; then
+  add_result "LSP Startup" false "Cannot check: Rscript is not in PATH" \
+    "Install R and the languageserver package"
 else
-  add_result "LSP Startup" false "Language server failed to start: $lsp_test" \
-    "Check R installation and languageserver package"
+  lsp_test=$(${timeout_cmd[@]+"${timeout_cmd[@]}"} Rscript -e "
+    suppressMessages(library(languageserver))
+    cat('LSP can start')
+  " 2>&1) || lsp_test=""
+
+  if [[ "$lsp_test" == *"LSP can start"* ]]; then
+    add_result "LSP Startup" true "Language server can initialize"
+  else
+    add_result "LSP Startup" false "Language server failed to start: $lsp_test" \
+      "Check R installation and languageserver package"
+  fi
 fi
 
 # Test 5: Check .lsp.json configuration (if in project with one)
@@ -92,7 +121,7 @@ if [[ -f ".lsp.json" ]]; then
     add_result "LSP Configuration" false ".lsp.json contains invalid JSON" \
       "Fix JSON syntax in .lsp.json"
   fi
-elif [[ -f "$CLAUDE_PROJECT_DIR/.lsp.json" ]] 2>/dev/null; then
+elif [[ -n "${CLAUDE_PROJECT_DIR:-}" && -f "$CLAUDE_PROJECT_DIR/.lsp.json" ]]; then
   if jq empty "$CLAUDE_PROJECT_DIR/.lsp.json" 2>/dev/null; then
     add_result "LSP Configuration" true ".lsp.json is valid JSON"
   else
