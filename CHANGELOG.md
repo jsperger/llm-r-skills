@@ -1,5 +1,30 @@
 # CHANGELOG
 
+## [0.3.0]
+
+### Added
+
+- **Agent lint profile**: `config/agent.lintr` - a correctness-only linter set
+  (object usage, missing packages, `== NA`, `T`/`F` symbols, and similar) applied
+  automatically when the project has no `.lintr`/`.lintr.R` of its own. Style-severity
+  lints are dropped: the `air` hook already fixes style after every edit, so they only
+  added diagnostic noise to sessions. A project's own lintr config always wins.
+- **LSP startup profile**: `config/agent.Rprofile`, delivered via `.lsp.json`
+  `env.R_PROFILE_USER` - wires up the agent lint profile, sources the user's real
+  `~/.Rprofile`, and disables the server's styler formatting capabilities (synchronous,
+  blocks the event loop, and would fight the `air` hook).
+- **LSP settings**: `.lsp.json` now enables `lint_cache` and a 15 s
+  `diagnostics_cache_ttl`.
+
+### Fixed
+
+- The agent lint profile now actually reaches the subprocess where linting runs.
+  languageserver lints in callr child processes, and callr rewrites `R_PROFILE_USER`
+  there, so locating `agent.lintr` relative to that env var silently fell back to
+  lintr's default (noisy) linters in real sessions. The profile now self-locates via
+  `CLAUDE_PLUGIN_ROOT`, with `R_PROFILE_USER` as the fallback for non-Claude launches.
+  Verified against live wire-tapped Claude Code sessions.
+
 ## [0.2.0]
 
 ### Added
