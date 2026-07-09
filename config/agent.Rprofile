@@ -1,9 +1,11 @@
 # Startup profile for agent LSP sessions. Delivered via the plugin's .lsp.json:
 #   "env": { "R_PROFILE_USER": "${CLAUDE_PLUGIN_ROOT}/config/agent.Rprofile" }
 # R reads R_PROFILE_USER *instead of* ~/.Rprofile, so the user's profile is
-# sourced explicitly below. languageserver's callr children inherit
-# R_PROFILE_USER and source this file too, which is what carries the
-# lintr.linter_file option into the subprocess where linting actually runs.
+# sourced explicitly below. languageserver's callr children source this file
+# too, which is what carries the lintr.linter_file option into the subprocess
+# where linting actually runs — but callr rewrites the R_PROFILE_USER env var
+# to its own chained profile in those children, so this file must not locate
+# itself through R_PROFILE_USER there (see self-location below).
 # This file must never write to stdout: output would corrupt the LSP stream.
 
 local({
@@ -12,11 +14,20 @@ local({
     source(user_profile)
   }
 
-  self <- Sys.getenv("R_PROFILE_USER")
-  if (!nzchar(self) || !file.exists(self)) {
-    return(invisible())
+  # Self-location: CLAUDE_PLUGIN_ROOT is exported by Claude Code to the server
+  # process and inherited unchanged by callr children; R_PROFILE_USER is the
+  # fallback for non-Claude launches (tests, manual runs), where only the main
+  # process sees the true path.
+  plugin_root <- Sys.getenv("CLAUDE_PLUGIN_ROOT")
+  if (nzchar(plugin_root) && dir.exists(file.path(plugin_root, "config"))) {
+    config_dir <- file.path(plugin_root, "config")
+  } else {
+    self <- Sys.getenv("R_PROFILE_USER")
+    if (!nzchar(self) || !file.exists(self)) {
+      return(invisible())
+    }
+    config_dir <- dirname(self)
   }
-  config_dir <- dirname(self)
 
   # A project's own lintr config always wins: only point lintr at the agent
   # profile when no .lintr/.lintr.R exists anywhere up the directory tree.
