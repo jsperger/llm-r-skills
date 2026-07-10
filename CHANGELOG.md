@@ -15,6 +15,23 @@
   blocks the event loop, and would fight the `air` hook).
 - **LSP settings**: `.lsp.json` now enables `lint_cache` and a 15 s
   `diagnostics_cache_ttl`.
+- **Version gate**: `lsp-test-harness.sh` (and therefore `/r-lsp-diagnose`) now
+  fails with an actionable message on the languageserver < 0.3.17 + lintr >= 3.3.0
+  pairing, which silently ignores `.lintr` files — including the agent lint profile
+  (upstream languageserver #726). Also gates on lintr >= 3.3.0.
+- **Tests**: `tests/diagnostics/test-agent-profile.sh` - regression tests for
+  `agent.Rprofile` delivery, reproducing the callr child-process environment that hid
+  the delivery bug below; plus version-gate tests for the harness using a fake-Rscript
+  sandbox to simulate the broken version pairing.
+
+### Changed
+
+- **`r-languageserver` skill** updated for the tuned setup: documents the
+  correctness-only diagnostics profile (treat every diagnostic as real; never chase
+  style — the `air` hook owns formatting), warns that the format hook leaves the
+  server one formatting pass behind disk (re-Read before trusting LSP line numbers
+  after a reformat; the next edit resyncs), and steers symbol lookup toward per-file
+  `documentSymbol` over `workspaceSymbol`, which the server returns unfiltered.
 
 ### Fixed
 

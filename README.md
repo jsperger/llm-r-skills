@@ -27,6 +27,21 @@ For full functionality, the following are required:
 - [jq](https://jqlang.org/download/) - JSON processor for hooks
 - [air](https://github.com/posit-dev/air) - R code formatter
 
+## Using the plugin effectively
+
+- **Formatting is automatic.** A hook runs `air format` after every file edit. Never
+  ask Claude to fix style or formatting — it is already done, and the language server
+  is configured not to compete with it.
+- **Lint diagnostics are correctness-only by default.** In a project with no
+  `.lintr`/`.lintr.R`, the language server lints with the plugin's slim profile
+  ([`config/agent.lintr`](config/agent.lintr)): object-usage errors, missing packages,
+  `== NA` comparisons, and similar real bugs — no line-length or spacing noise burning
+  context. If your project ships its own `.lintr`, it always wins, and Claude sees
+  exactly the lints your CI sees.
+- **Something not working?** Run `/r-lsp-diagnose`. It checks the toolchain end to
+  end, including the languageserver/lintr version combination that silently disables
+  `.lintr` files.
+
 ## Skills
 
 ### [designing-tidy-r-functions](skills/designing-tidy-r-functions)
