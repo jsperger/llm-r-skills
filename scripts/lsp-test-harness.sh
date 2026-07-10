@@ -93,7 +93,41 @@ else
   fi
 fi
 
-# Test 4: Check if LSP can start
+# Test 4: Check languageserver/lintr version compatibility
+# languageserver < 0.3.17 combined with lintr >= 3.3.0 silently ignores .lintr
+# files (lintr's parse_settings regression; upstream languageserver #726). The
+# plugin's agent lint profile depends on .lintr being honored, so this pairing
+# must be a hard failure. Version comparison is done in R via packageVersion():
+# bash 3.2 and BSD sort have no reliable -V.
+if ! command -v Rscript &>/dev/null; then
+  add_result "Version Compatibility" false "Cannot check: Rscript is not in PATH" \
+    "Install R first, then install.packages(c('languageserver', 'lintr'))"
+elif ! Rscript -e "library(languageserver); library(lintr)" 2>/dev/null; then
+  add_result "Version Compatibility" false \
+    "Cannot check: languageserver and/or lintr is not installed" \
+    "Install both packages, then re-run this harness"
+else
+  ls_recent=$(Rscript -e "cat(packageVersion('languageserver') >= '0.3.17')" 2>/dev/null) || ls_recent=""
+  lintr_recent=$(Rscript -e "cat(packageVersion('lintr') >= '3.3.0')" 2>/dev/null) || lintr_recent=""
+
+  if [[ -z "$ls_recent" || -z "$lintr_recent" ]]; then
+    add_result "Version Compatibility" false "Cannot check: failed to read package versions" \
+      "Verify the languageserver and lintr installations, then re-run this harness"
+  elif [[ "$ls_recent" == "TRUE" && "$lintr_recent" == "TRUE" ]]; then
+    add_result "Version Compatibility" true \
+      "languageserver ${ls_version:-unknown} and lintr ${lintr_version:-unknown} are compatible (.lintr settings are honored)"
+  elif [[ "$lintr_recent" != "TRUE" ]]; then
+    add_result "Version Compatibility" false \
+      "lintr ${lintr_version:-unknown} is older than 3.3.0" \
+      "Upgrade lintr to >= 3.3.0: install.packages('lintr')"
+  else
+    add_result "Version Compatibility" false \
+      "languageserver ${ls_version:-unknown} with lintr ${lintr_version:-unknown}: .lintr files (including the plugin's agent lint profile) are silently ignored — diagnostics fall back to lintr defaults (upstream languageserver #726)" \
+      "Upgrade languageserver to >= 0.3.17: install.packages('languageserver')"
+  fi
+fi
+
+# Test 5: Check if LSP can start
 # ${arr[@]+"${arr[@]}"} keeps an empty timeout_cmd from tripping `set -u` on
 # bash 3.2, which is what macOS ships as /bin/bash.
 if ! command -v Rscript &>/dev/null; then
@@ -113,7 +147,7 @@ else
   fi
 fi
 
-# Test 5: Check .lsp.json configuration (if in project with one)
+# Test 6: Check .lsp.json configuration (if in project with one)
 if [[ -f ".lsp.json" ]]; then
   if jq empty .lsp.json 2>/dev/null; then
     add_result "LSP Configuration" true ".lsp.json is valid JSON"
@@ -132,7 +166,7 @@ else
   add_result "LSP Configuration" true "No .lsp.json found (using defaults)"
 fi
 
-# Test 6: Check if air formatter is available
+# Test 7: Check if air formatter is available
 if command -v air &>/dev/null; then
   air_version=$(air --version 2>&1 || echo "unknown")
   add_result "air Formatter" true "Version: $air_version"

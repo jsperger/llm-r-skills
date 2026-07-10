@@ -1,0 +1,12 @@
+linters: list(
+    object_usage_linter(),
+    equals_na_linter(),
+    seq_linter(),
+    vector_logic_linter(),
+    missing_package_linter(),
+    missing_argument_linter(),
+    duplicate_argument_linter(),
+    class_equals_linter(),
+    T_and_F_symbol_linter()
+  )
+encoding: "UTF-8"

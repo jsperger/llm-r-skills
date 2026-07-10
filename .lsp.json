@@ -5,6 +5,13 @@
     "extensionToLanguage": {
       ".R": "R",
       ".r": "R"
+    },
+    "env": {
+      "R_PROFILE_USER": "${CLAUDE_PLUGIN_ROOT}/config/agent.Rprofile"
+    },
+    "settings": {
+      "lint_cache": true,
+      "diagnostics_cache_ttl": 15
     }
   }
 }
