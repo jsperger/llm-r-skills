@@ -11,7 +11,20 @@
 local({
   user_profile <- path.expand("~/.Rprofile")
   if (file.exists(user_profile)) {
-    source(user_profile)
+    # ~/.Rprofile may cat()/print(); on the LSP's stdio channel that is protocol
+    # corruption. Discard R-level stdout while it runs. Only base and methods are
+    # attached this early, so utils::capture.output does not exist yet — sink(),
+    # nullfile() and file() are base. A subprocess started by the profile still
+    # writes fd 1 directly; sink() cannot reach that.
+    # finally, not error: a profile that throws already halts every other R
+    # session the user runs, and continuing on half-applied .libPaths() would
+    # give languageserver a broken library set and the agent bogus diagnostics.
+    null_con <- file(nullfile(), open = "wt")
+    sink(null_con)
+    tryCatch(source(user_profile), finally = {
+      sink()
+      close(null_con)
+    })
   }
 
   # Self-location: CLAUDE_PLUGIN_ROOT is exported by Claude Code to the server

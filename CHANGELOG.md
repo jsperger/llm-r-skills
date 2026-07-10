@@ -12,7 +12,10 @@
 - **LSP startup profile**: `config/agent.Rprofile`, delivered via `.lsp.json`
   `env.R_PROFILE_USER` - wires up the agent lint profile, sources the user's real
   `~/.Rprofile`, and disables the server's styler formatting capabilities (synchronous,
-  blocks the event loop, and would fight the `air` hook).
+  blocks the event loop, and would fight the `air` hook). Anything your `~/.Rprofile`
+  prints is discarded, since it would otherwise corrupt the LSP protocol stream. An
+  error in it is not caught: a broken `~/.Rprofile` stops the language server from
+  starting, the same way it stops any other R session.
 - **LSP settings**: `.lsp.json` now enables `lint_cache` and a 15 s
   `diagnostics_cache_ttl`.
 - **Version gate**: `lsp-test-harness.sh` (and therefore `/r-lsp-diagnose`) now

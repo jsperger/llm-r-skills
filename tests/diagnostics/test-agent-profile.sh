@@ -77,6 +77,17 @@ assert_eq() {
   fi
 }
 
+# assert_contains <label> <needle> <haystack>
+# For assertions that must hold regardless of stray profile chatter, so that one
+# defect (noise on stdout) cannot mask an unrelated one (profile never sourced).
+assert_contains() {
+  if [[ "$3" == *"$2"* ]]; then
+    pass "$1"
+  else
+    fail "$1" "expected to find [$2] in [$3]"
+  fi
+}
+
 # The profile's has_project_lintr() walks UP from getwd() to the filesystem
 # root, so a stray .lintr in any ancestor of the temp cwd would flip every
 # scenario to the "project config wins" branch. R sees the kernel-resolved
@@ -98,6 +109,27 @@ done
 # user profile could set lintr.linter_file (or print) and corrupt the run.
 tmp_home="$tmp_root/home"
 mkdir -p "$tmp_home"
+
+# A talkative user profile: cat()/print() at startup land on fd 1, which is the
+# LSP's stdio channel (.lsp.json runs `R --no-echo -e "languageserver::run()"`).
+chatty_home="$tmp_root/home-chatty"
+mkdir -p "$chatty_home"
+# It also sets an option, so a suppression bug that skips the user's profile
+# entirely cannot pass the stdout assertions vacuously.
+cat > "$chatty_home/.Rprofile" <<'EOF'
+cat("CHATTY-CAT\n")
+print("CHATTY-PRINT")
+options(sentinel_user = TRUE)
+EOF
+
+# A user profile that throws partway. R halts on this natively, for every R
+# session the user runs; the agent profile must not paper over it.
+broken_home="$tmp_root/home-broken"
+mkdir -p "$broken_home"
+cat > "$broken_home/.Rprofile" <<'EOF'
+options(sentinel_before = TRUE)
+stop("renv activate failed")
+EOF
 
 # Stand-in for callr's chained temp profile: a file in a directory containing
 # no agent.lintr, which source()s the original profile — callr's exact
@@ -155,6 +187,15 @@ run_silent() {
   run_exit=$?
 }
 
+# run_expr <cwd> <r_expr> [env args...]
+# Same plumbing, arbitrary read-back expression.
+run_expr() {
+  local cwd="$1" expr="$2"
+  shift 2
+  out=$(cd "$cwd" && env "$@" Rscript "${r_flags[@]}" -e "$expr" 2>/dev/null)
+  run_exit=$?
+}
+
 echo "== profile parses =="
 
 if Rscript --vanilla -e "invisible(parse(\"$agent_profile\"))" >/dev/null 2>&1; then
@@ -201,6 +242,48 @@ run_profile "$project_cwd" \
   HOME="$tmp_home" R_PROFILE_USER="$decoy" CLAUDE_PLUGIN_ROOT="$repo_root"
 assert_eq "project .lintr: exit 0" 0 "$run_exit"
 assert_eq "project .lintr: option stays NULL" "SENTINEL:NULL" "$out"
+
+echo "== user ~/.Rprofile: stdout suppressed, errors not swallowed =="
+
+# The user's profile may cat()/print(); that output would corrupt the LSP
+# stream. The agent profile sinks R-level stdout to nullfile() around the
+# source() call. utils::capture.output is NOT an option here: only base and
+# methods are attached while .Rprofile runs, so it does not exist yet, and a
+# tryCatch that swallows the resulting "could not find function" would silently
+# skip the user's profile altogether.
+# Assert first that the user's profile RAN. Without this, a suppression bug that
+# skips ~/.Rprofile altogether satisfies every stdout assertion below for the
+# wrong reason. assert_contains, not assert_eq: a profile that both leaks stdout
+# and sources correctly should fail only the leak assertion.
+run_expr "$clean_cwd" 'cat("SENTINEL:", isTRUE(getOption("sentinel_user")), sep = "")' \
+  HOME="$chatty_home" R_PROFILE_USER="$decoy" CLAUDE_PLUGIN_ROOT="$repo_root"
+assert_contains "chatty ~/.Rprofile: user profile is actually sourced" \
+  "SENTINEL:TRUE" "$out"
+
+run_silent "$clean_cwd" \
+  HOME="$chatty_home" R_PROFILE_USER="$decoy" CLAUDE_PLUGIN_ROOT="$repo_root"
+assert_eq "chatty ~/.Rprofile: exit 0" 0 "$run_exit"
+assert_eq "chatty ~/.Rprofile: nothing reaches stdout" "" "$out"
+
+# The sink must be balanced afterwards, or every later LSP write vanishes into
+# nullfile(). assert_contains keeps this independent of the leak assertion above.
+run_profile "$clean_cwd" \
+  HOME="$chatty_home" R_PROFILE_USER="$decoy" CLAUDE_PLUGIN_ROOT="$repo_root"
+assert_contains "chatty ~/.Rprofile: R still writes stdout afterwards (sink balanced)" \
+  "SENTINEL:$real_lintr" "$out"
+
+# A throwing ~/.Rprofile must still halt R. Continuing would leave the profile
+# half-applied (.libPaths() unset), and languageserver would then flood the
+# agent with bogus "no symbol named X" diagnostics against a broken library set.
+# A dead server is loud; a half-configured one lies.
+run_profile "$clean_cwd" \
+  HOME="$broken_home" R_PROFILE_USER="$decoy" CLAUDE_PLUGIN_ROOT="$repo_root"
+if [[ "$run_exit" -ne 0 ]]; then
+  pass "broken ~/.Rprofile: R halts rather than limping on partial state"
+else
+  fail "broken ~/.Rprofile: R halts rather than limping on partial state" \
+    "expected nonzero exit, got 0 (error was swallowed)"
+fi
 
 echo "== bogus everything: degrade silently =="
 
