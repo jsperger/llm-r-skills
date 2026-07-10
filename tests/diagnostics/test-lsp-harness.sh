@@ -88,6 +88,36 @@ make_sandbox() {
   done
 }
 
+# make_fake_rscript <sandbox-dir> <ls-version> <lintr-version> <ls-ge-0.3.17> <lintr-ge-3.3.0>
+# Replaces the sandbox's Rscript symlink with a shim that emulates the
+# harness's Rscript invocations against configurable package versions, so the
+# version-compatibility gate can be exercised without installing old packages.
+# The shim parses the -e expression it receives rather than answering blindly;
+# comparison-expression patterns are matched before plain packageVersion ones
+# because the former contain the latter as a substring. Unknown expressions
+# (and library() loads) exit 0 silently, mimicking a healthy Rscript. The
+# symlink is removed first: writing through it would clobber the real Rscript.
+make_fake_rscript() {
+  local dir="$1" ls_ver="$2" lintr_ver="$3" ls_ge="$4" lintr_ge="$5"
+  rm -f "$dir/Rscript"
+  cat > "$dir/Rscript" <<EOF
+#!/bin/bash
+expr=""
+if [[ "\${1:-}" == "-e" ]]; then
+  expr="\${2:-}"
+fi
+case "\$expr" in
+  *"LSP can start"*) printf 'LSP can start' ;;
+  *"packageVersion('languageserver') >= "*) printf '%s' "$ls_ge" ;;
+  *"packageVersion('lintr') >= "*) printf '%s' "$lintr_ge" ;;
+  *"packageVersion('languageserver')"*) printf '%s' "$ls_ver" ;;
+  *"packageVersion('lintr')"*) printf '%s' "$lintr_ver" ;;
+esac
+exit 0
+EOF
+  chmod +x "$dir/Rscript"
+}
+
 # run_harness <sandbox-dir-or-empty> <cwd> [env assignments...]
 # Sets globals `out` and `run_exit`. Deliberately not echoing its output: a
 # caller writing out=$(run_harness ...) would run it in a subshell and lose the
@@ -140,7 +170,7 @@ echo "== always emits JSON =="
 run_harness "" "$repo_root" -u CLAUDE_PROJECT_DIR
 assert_eq "healthy env: exit 0" 0 "$run_exit"
 assert_json "healthy env: stdout is non-empty valid JSON" "$out"
-assert_eq "healthy env: reports 6 tests" 6 "$(printf '%s' "$out" | jq '.tests | length')"
+assert_eq "healthy env: reports 7 tests" 7 "$(printf '%s' "$out" | jq '.tests | length')"
 
 echo "== missing jq (regression: PR #1 review) =="
 
@@ -165,13 +195,13 @@ sb_nor="$tmp_root/sb-nor"
 make_sandbox "$sb_nor" R Rscript
 run_harness "$sb_nor" "$no_config_dir" -u CLAUDE_PROJECT_DIR
 assert_eq "no R: exit 0 (no set -e abort)" 0 "$run_exit"
-assert_eq "no R: reports 6 tests" 6 "$(printf '%s' "$out" | jq '.tests | length')"
+assert_eq "no R: reports 7 tests" 7 "$(printf '%s' "$out" | jq '.tests | length')"
 assert_eq "no R: R Installation fails" false \
   "$(printf '%s' "$out" | jq '.tests[] | select(.name=="R Installation") | .passed')"
 
 # The diagnostic value is in the *message*: "cannot check" is honest,
 # "not installed" is a fabrication the harness cannot support.
-for t in "languageserver Package" "lintr Package" "LSP Startup"; do
+for t in "languageserver Package" "lintr Package" "Version Compatibility" "LSP Startup"; do
   msg=$(printf '%s' "$out" | jq -r --arg t "$t" '.tests[] | select(.name==$t) | .message')
   case "$msg" in
     *"Cannot check"*) pass "no R: '$t' says it cannot check" ;;
@@ -193,6 +223,56 @@ if command -v Rscript &>/dev/null; then
     "$(printf '%s' "$out" | jq '.tests[] | select(.name=="LSP Startup") | .passed')"
 else
   echo "  skip no-timeout test (needs a working Rscript to be meaningful)"
+fi
+
+echo "== version compatibility gate (upstream languageserver #726) =="
+
+# languageserver < 0.3.17 with lintr >= 3.3.0 silently ignores .lintr files,
+# including the plugin's agent lint profile. The sandbox keeps the real R (so
+# Test 1 behaves normally) and swaps only Rscript for a shim reporting the
+# broken pairing; the assertions pin both the verdict and the message, because
+# a failure that doesn't name the silent-.lintr failure mode is undiagnosable.
+sb_oldls="$tmp_root/sb-oldls"
+make_sandbox "$sb_oldls"
+make_fake_rscript "$sb_oldls" "0.3.16" "3.3.0" FALSE TRUE
+run_harness "$sb_oldls" "$no_config_dir" -u CLAUDE_PROJECT_DIR
+assert_eq "old languageserver: exit 0" 0 "$run_exit"
+assert_json "old languageserver: stdout is non-empty valid JSON" "$out"
+assert_eq "old languageserver: Version Compatibility fails" false \
+  "$(printf '%s' "$out" | jq '.tests[] | select(.name=="Version Compatibility") | .passed')"
+msg=$(printf '%s' "$out" | jq -r '.tests[] | select(.name=="Version Compatibility") | .message')
+case "$msg" in
+  *".lintr"*"ignored"*) pass "old languageserver: message names the silent-.lintr failure mode" ;;
+  *) fail "old languageserver: message names the silent-.lintr failure mode" "got: $msg" ;;
+esac
+fix=$(printf '%s' "$out" | jq -r '.tests[] | select(.name=="Version Compatibility") | .fix')
+case "$fix" in
+  *"0.3.17"*) pass "old languageserver: fix says upgrade to >= 0.3.17" ;;
+  *) fail "old languageserver: fix says upgrade to >= 0.3.17" "got: $fix" ;;
+esac
+
+# Old lintr is the other side of the gate: fail, but with an upgrade-lintr fix
+# rather than the #726 misdiagnosis.
+sb_oldlintr="$tmp_root/sb-oldlintr"
+make_sandbox "$sb_oldlintr"
+make_fake_rscript "$sb_oldlintr" "0.3.18" "3.2.0" TRUE FALSE
+run_harness "$sb_oldlintr" "$no_config_dir" -u CLAUDE_PROJECT_DIR
+assert_eq "old lintr: Version Compatibility fails" false \
+  "$(printf '%s' "$out" | jq '.tests[] | select(.name=="Version Compatibility") | .passed')"
+fix=$(printf '%s' "$out" | jq -r '.tests[] | select(.name=="Version Compatibility") | .fix')
+case "$fix" in
+  *"lintr"*"3.3.0"*) pass "old lintr: fix says upgrade lintr to >= 3.3.0" ;;
+  *) fail "old lintr: fix says upgrade lintr to >= 3.3.0" "got: $fix" ;;
+esac
+
+# The real environment on this machine has a compatible pairing installed; the
+# gate must pass there, not just fail in the simulated-broken sandboxes.
+if command -v Rscript &>/dev/null; then
+  run_harness "" "$no_config_dir" -u CLAUDE_PROJECT_DIR
+  assert_eq "real env: Version Compatibility passes" true \
+    "$(printf '%s' "$out" | jq '.tests[] | select(.name=="Version Compatibility") | .passed')"
+else
+  echo "  skip real-env version gate test (needs a working Rscript)"
 fi
 
 echo "== unset CLAUDE_PROJECT_DIR (regression: PR #1 review) =="

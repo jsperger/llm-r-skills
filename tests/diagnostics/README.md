@@ -1,15 +1,18 @@
 # Diagnostic tests
 
-Deterministic tests of the plugin's own shell tooling. No model in the loop, no
-network, no MLflow — just assertions about what `scripts/lsp-test-harness.sh`
-does under conditions we cannot reproduce on a healthy developer machine.
+Deterministic tests of the plugin's own shipped tooling. No model in the loop,
+no network, no MLflow — just assertions about what the scripts and config the
+plugin ships actually do, under conditions we cannot reproduce on a healthy
+developer machine.
 
 ```bash
-tests/diagnostics/test-lsp-harness.sh     # exits 0 if all pass
+tests/diagnostics/test-lsp-harness.sh       # scripts/lsp-test-harness.sh; exits 0 if all pass
+tests/diagnostics/test-agent-profile.sh     # config/agent.Rprofile delivery; exits 0 if all pass
 ```
 
-Requires `bash` and `jq`. `shellcheck` and `Rscript` are used if present and
-skipped with a note if not.
+The harness suite requires `bash` and `jq`; `shellcheck` and `Rscript` are used
+if present and skipped with a note if not. The agent-profile suite requires
+`Rscript` (the behaviour under test is R startup itself).
 
 ## How these differ from `evals/`
 
@@ -54,7 +57,7 @@ a place where a perfectly ordinary shell idiom silently violated the invariant.
 
 ### Healthy environment
 
-Baseline. All six sub-tests present, valid JSON, exit 0. Establishes that the
+Baseline. All seven sub-tests present, valid JSON, exit 0. Establishes that the
 degraded-environment tests below are measuring degradation and not a harness
 that was broken to begin with.
 
@@ -82,7 +85,7 @@ reported "languageserver package not installed" and "lintr package not
 installed", and advised the user to run `install.packages()` — with no R to run
 it in. Three failures, one root cause, two of them fabricated.
 
-- **Expected now:** `R Installation` fails; the three downstream tests report
+- **Expected now:** `R Installation` fails; the four downstream tests report
   `Cannot check: Rscript is not in PATH` and point at installing R first.
 - **Informative because:** it asserts on the *message*, not just the pass/fail
   bit. A diagnostic's value is entirely in whether its explanation is true. The
@@ -101,6 +104,30 @@ message on every such machine.
   coreutils. It is invisible on any developer machine that has coreutils
   installed — which is why it needs a PATH sandbox to catch, and why it survived
   into review.
+
+### Version compatibility gate — upstream languageserver #726
+
+languageserver < 0.3.17 combined with lintr >= 3.3.0 silently ignores `.lintr`
+files (lintr's `parse_settings` regression) — including the plugin's agent lint
+profile, whose entire delivery path depends on `.lintr` discovery working. The
+failure is invisible: diagnostics still arrive, just from lintr's default
+(noisy) linter set.
+
+Old package versions can't be installed just to test this, so a shim `Rscript`
+(`make_fake_rscript`) replaces the sandbox symlink and answers the harness's
+version queries with configurable values. Three cases:
+
+- **languageserver 0.3.16 + lintr 3.3.0** → gate fails, and the *message* must
+  name the silent-`.lintr` failure mode with the fix pointing at >= 0.3.17. A
+  bare `passed: false` would be undiagnosable.
+- **languageserver 0.3.18 + lintr 3.2.0** → gate fails with an upgrade-lintr
+  fix, not the #726 misdiagnosis.
+- **Real environment** → gate passes. The gate must be provably capable of
+  passing, not just of failing in simulated sandboxes.
+
+- **Informative because:** this is the exact failure mode of upstream issue
+  #726, and the harness is the only place a user (or `/r-lsp-diagnose`) would
+  ever learn about it — nothing else in the stack reports it.
 
 ### Unset `CLAUDE_PROJECT_DIR` — regression, PR #1 review
 
@@ -146,6 +173,32 @@ Plus an end-to-end run under `/bin/bash` explicitly.
   introduces exactly the crash the missing-`R` comment wrongly alleged. The
   guard is not stylistic.
 
+## The agent-profile suite — regression, callr children
+
+`config/agent.Rprofile` reaches the language server via `.lsp.json`
+`env.R_PROFILE_USER`, but languageserver lints in **callr child processes**,
+and callr rewrites `R_PROFILE_USER` there to its own chained temp profile
+(which sources the original). The pre-fix profile self-located through
+`R_PROFILE_USER`, so in the one process where lintr discovery actually runs it
+looked for `agent.lintr` in callr's temp dir and silently fell back to lintr's
+default linters. The fix self-locates via `CLAUDE_PLUGIN_ROOT`, which callr
+children inherit unchanged.
+
+`test-agent-profile.sh` reproduces the callr-child condition without callr: it
+points `R_PROFILE_USER` at a decoy chained profile (callr's exact mechanism)
+while `CLAUDE_PLUGIN_ROOT` names the real plugin, runs R's genuine
+profile-sourcing startup path, and reads back `getOption("lintr.linter_file")`.
+It also asserts the fallback branch (no `CLAUDE_PLUGIN_ROOT`), that a project's
+own `.lintr` is never overridden, that a fully bogus environment degrades
+silently, and that the profile writes nothing to stdout (stray output would
+corrupt the LSP stream).
+
+- **Informative because:** this bug shipped. It was invisible to F-layer
+  fixtures that hardcoded an absolute `lintr.linter_file`, invisible on any
+  machine where the fallback happened to work, and only surfaced in live
+  wire-tapped sessions. The suite pins the exact process-environment shape
+  that hid it.
+
 ## Verifying the tests actually test something
 
 A regression test that passes against the broken code is worthless. Point the
@@ -157,9 +210,16 @@ chmod +x /tmp/old.sh
 LSP_HARNESS=/tmp/old.sh tests/diagnostics/test-lsp-harness.sh
 ```
 
+The agent-profile suite is overridable the same way
+(`AGENT_PROFILE=/tmp/prefix-profile.R`, extracted from the pre-fix revision);
+against `e7c7d34:config/agent.Rprofile` exactly the callr-child resolution
+assertion fails.
+
 Against the commit immediately preceding the PR #1 fixes this reports
 `13 passed, 14 failed`, with every failure in a section labelled
-`regression: PR #1 review`. Against the current harness: `27 passed, 0 failed`.
+`regression: PR #1 review`. Against the harness as of v0.2.0 (before the
+version-compatibility gate): `27 passed, 9 failed`, every failure among the
+gate's new assertions. Against the current harness: `36 passed, 0 failed`.
 
 Do this whenever you add a test here. It is the only way to know the assertion
 discriminates. One assertion in the first draft of this suite (`stdout is valid
