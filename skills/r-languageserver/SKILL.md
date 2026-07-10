@@ -1,8 +1,8 @@
 ---
 name: r-languageserver
 description: >
-  Use when navigating, reading, or refactoring R code: finding where an R function is defined or called, tracing call hierarchies, finding a function's callers before changing it (impact analysis), or looking up a function's documentation. Prefer the LSP over text search for these — it resolves symbols semantically and avoids false matches in comments, strings, and docstrings.
-version: "0.2.0"
+  Use when navigating, reading, or refactoring R code: finding where an R function is defined or called, tracing call hierarchies, finding a function's callers before changing it (impact analysis), looking up a function's documentation, or interpreting the lint diagnostics that appear after editing R files. Prefer the LSP over text search for these — it resolves symbols semantically and avoids false matches in comments, strings, and docstrings.
+version: "0.3.0"
 
 ---
 
@@ -150,7 +150,13 @@ LSP workspaceSymbol (from any R file)
   - targets/pipeline.R: data_tar (Field) - Line 5
 ```
 
-The current implementation returns all indexed symbols without query filtering. Scan the output or use Grep as a fallback for large workspaces.
+**Use this sparingly.** The R languageserver ignores the query string and returns *every* indexed symbol in the workspace — on a large package that is one enormous dump of output for a single lookup. Prefer, in order:
+
+1. `documentSymbol` on the file you suspect (a per-file sitemap, always cheap)
+2. `goToDefinition` from a call site you already know about
+3. `workspaceSymbol` only on small projects, or when you genuinely have no lead
+
+If you need a name search on a large package, a targeted `Grep` for the definition pattern (e.g. `FitModel <- function`) costs less context than an unfiltered symbol dump.
 
 ## Behavior Notes
 
@@ -168,14 +174,21 @@ When `goToDefinition` resolves to an external package (CRAN, tidyverse, etc.), t
 
 This is extracted source code from the installed package. The content is readable and accurate but the path is ephemeral.
 
-### Diagnostics as Side Effects
+### Diagnostics: Correctness-Only by Design
 
-When accessing files through LSP operations, the languageserver may publish diagnostics (lintr warnings) as side effects. These appear in tool output as `<new-diagnostics>` blocks. This behavior cannot be explicitly requested—it occurs automatically during file indexing.
+Editing or accessing R files makes the languageserver publish lintr diagnostics, which appear in tool output as `<new-diagnostics>` blocks. This cannot be explicitly requested—diagnostics arrive as a push channel after edits and indexing.
 
-Common diagnostics include:
-- `implicit_integer_linter`: Use `1L` instead of `1`
-- `line_length_linter`: Lines over 80 characters
-- `undesirable_operator_linter`: Warnings about `:::`
+When the project has no `.lintr`/`.lintr.R` of its own, the plugin applies a **correctness-only lint profile**: syntax errors plus linters that catch real bugs (`object_usage_linter`, `missing_package_linter`, `equals_na_linter`, `missing_argument_linter`, `T_and_F_symbol_linter`, and similar). Treat every diagnostic you receive as a genuine problem worth fixing.
+
+What you will NOT see, and must not chase:
+- **No style lints** (line length, spacing, indentation, implicit integers). The `air` formatting hook rewrites every file after each Write/Edit — style is handled for you, for free. Never spend edits on formatting.
+- If the project ships its own `.lintr`, that config **always wins** and you see whatever the project's CI sees, style lints included. Even then, formatting-class complaints usually resolve themselves at the next edit via the hook.
+
+### Stale Positions After the Format Hook
+
+The `air` hook reformats the file **on disk** after your edit, but that rewrite is not replayed to the language server — the server's view of the file lags disk by exactly one formatting pass, until your next edit resyncs it. If the reformat changed line counts, LSP answers (definition/reference/diagnostic line numbers) can be off for positions below your edit.
+
+Rule of thumb: after an edit that the hook may have reformatted, **re-Read the file before trusting LSP line numbers** in that file. Any subsequent edit heals the skew automatically.
 
 ### Workspace Indexing
 
@@ -190,7 +203,7 @@ Some operations require files to be "seen" by the LSP before they're fully index
 | Get function documentation | `hover` |
 | List functions in a file | `documentSymbol` |
 | Find all usages of a function | `findReferences` |
-| Search for a function by name | `workspaceSymbol`; `Grep` only as a fallback for very large workspaces |
+| Search for a function by name | `documentSymbol` on likely files first; `workspaceSymbol` only on small projects (it dumps every symbol, unfiltered) |
 | Understand what calls a function | `incomingCalls` |
 | Understand what a function calls | `outgoingCalls` |
 | Read function implementation | `Read` with offset/limit |
